@@ -1,20 +1,16 @@
 
-class Event {}
-class StateChangeEvent is Event {
-  construct new() { _type = "global" }
-  construct new(type) {
-    _type = type
+
+
+class GameResult {
+  progress=(v) { _progress = v}
+  progress { _progress }
+  events { _events }
+
+  construct new() {
+    _progress = false
+    _events = []
   }
-  type { _type }
 }
-
-var Dir = {
-  "left": { "x": -1, "y": 0 },
-  "right": { "x": 1, "y": 0 },
-  "up": { "x": 0, "y": -1 },
-  "down": { "x": 0, "y": 1 }
-}
-
 
 class GameModel {
   map { _map }
@@ -29,34 +25,25 @@ class GameModel {
     _entities.each{|entity| entity.bindGame(this) }
     _player = _entities.where {|entity| entity.type == "player" }.toList[0]
     _energy = 10
-    _listeners = []
     _turn = 0
-  }
-
-  registerListener(listener) {
-    _listeners.add(listener)
-  }
-
-  emit(event) {
-    _listeners.each {|listener|
-      listener.receive(event)
-    }
   }
 
   process() {
     var actor = _entities[_turn]
-    var action = actor.action
+    var action = actor.getAction()
     if (action == null) {
-      return false
+      return GameResult.new()
     }
     System.print("Taking turn: %(actor.type)")
     action.bind(actor)
-    if (action.perform()) {
+    _result = GameResult.new()
+    _result.progress = action.perform()
+
+    if (_result.progress) {
       consumeEnergy(action.energy)
       _turn = (_turn + 1) % _entities.count
-      return true
     }
-    return false
+    return _result
   }
 
   consumeEnergy(n) {
@@ -83,16 +70,12 @@ class GameModel {
       var success = false
       var x = x0
       var y = y0
-      System.print("Dir: %(dirX), %(dirY)")
-      System.print("0: %(x0), %(y0)")
       while (!done) {
         x = x + dirX
         y = y + dirY
-        System.print("%(x), %(y)")
         done = !isTileValid(x, y) || isTileSolid(x, y)
         if (!done) {
           done = x == x1 && y == y1
-          System.print("%(done)")
 
           success = done
         } else {
@@ -103,6 +86,16 @@ class GameModel {
     } else {
       return false
     }
+  }
 
+
+  addEventToResult(event) {
+    if (_result != null) {
+      _result.events.add(event)
+    } else {
+      Fiber.abort("Tried to add an event without a result")
+    }
   }
 }
+
+import "./dir" for Dir

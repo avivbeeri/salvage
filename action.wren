@@ -1,7 +1,18 @@
+class Event {}
+class BoltEvent {
+  source { _source }
+  target { _target }
+  construct new(source, tx, ty) {
+    _source = source
+    _target = [tx, ty]
+  }
+}
+
+
 class Action {
   type { _type }
   actor { _actor }
-  model { _model }
+  game { _game }
   energy { 0 }
 
   construct new(type) {
@@ -9,19 +20,14 @@ class Action {
   }
 
   bind(actor) {
-    _model = actor.game
+    _game = actor.game
     _actor = actor
   }
 
   perform() { true }
+  addEvent(event) { _game.addEventToResult(event) }
 }
 
-var Dir = {
-  "left": { "x": -1, "y": 0 },
-  "right": { "x": 1, "y": 0 },
-  "up": { "x": 0, "y": -1 },
-  "down": { "x": 0, "y": 1 }
-}
 
 class FireWeaponAction is Action {
   construct new(direction) {
@@ -37,23 +43,26 @@ class FireWeaponAction is Action {
     var y = actor.y
     var solid = false
     var valid = true
+    var targets
     while (valid && !solid && !hit) {
       x = x + vec["x"]
       y = y + vec["y"]
-      valid = model.isTileValid(x, y)
-      solid = valid && model.isTileSolid(x, y)
+      valid = game.isTileValid(x, y)
+      solid = valid && game.isTileSolid(x, y)
       if (valid && !solid) {
-        var target = model.entities.where {|entity|
+        targets = game.entities.where {|entity|
           return entity != actor &&
             entity.x == x &&
             entity.y == y
-        }
-        hit = target.count > 0
+        }.toList
+        hit = targets.count > 0
       }
     }
     if (hit) {
       // handle hit
-      model.consumeEnergy(1)
+      game.consumeEnergy(1)
+      var target = targets[0]
+      game.addEventToResult(BoltEvent.new(actor, target.x, target.y))
     }
     System.print("Hit: %(hit)")
     // push an animation event to the ui
@@ -92,7 +101,7 @@ class MoveAction is Action {
     var validMove = false
 
     if ((destX >= 0 && destX < 7) && (destY >= 0 && destY < 7)) {
-      var tile = model.map[destY * 7 + destX]
+      var tile = game.map[destY * 7 + destX]
       var isSolid = (tile == 1)
       if (!isSolid) {
         actor.x = destX
@@ -105,3 +114,5 @@ class MoveAction is Action {
   }
 
 }
+
+import "./dir" for Dir

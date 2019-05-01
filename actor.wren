@@ -10,7 +10,7 @@ class Actor {
   x=(v) { _x = v }
   y=(v) { _y = v }
   type { _type }
-  action { Action.new(null) }
+  getAction() { Action.new(null) }
   state { _state }
   state=(s) { _state = s }
 
@@ -22,7 +22,7 @@ class Enemy is Actor {
   construct new(type, x, y) {
     super(type, x, y)
   }
-  action {
+  getAction() {
     if (state != "charging") {
       if (game.canSeeOrth(x, y, game.player.x, game.player.y)) {
         return ChargeWeaponAction.new()
@@ -44,7 +44,7 @@ class Player is Actor {
     _action = null
   }
 
-  action {
+  getAction() {
     var action = _action
     _action = null
     return action
