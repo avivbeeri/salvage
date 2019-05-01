@@ -5,6 +5,31 @@ var Keys = [
   "left", "right", "up", "down"
 ]
 
+class Animation {
+  done=(v) { _done = v }
+  done { _done || false }
+  t { _t || 0 }
+  update() { _t = t + 1 }
+  draw() {}
+}
+
+class BoltAnimation is Animation {
+  construct new(source, target) {
+    _source = source
+    _target = target
+  }
+
+  draw() {
+      var h = (_source.y-_target[1]).abs - 1
+      Canvas.rectfill(_source.x*16+12, _source.y*16+24, 8, h*16, Color.yellow)
+
+      if (this.t > 2) {
+        this.done = true
+      }
+  }
+
+}
+
 class Game {
 
   static init() {
@@ -77,11 +102,14 @@ class Game {
 
     if (__animations.count > 0) {
       var a = __animations[0]
+      /*
       var h = (a.source.y-a.target[1]).abs - 1
       Canvas.rectfill(a.source.x*16+12, a.source.y*16+24, 8, h*16,Color.yellow)
-
-
-      __animations.removeAt(0)
+      */
+      a.draw()
+      if (a.done) {
+        __animations.removeAt(0)
+      }
     }
   }
 
@@ -108,6 +136,7 @@ class Game {
       System.print(__events)
 
       // TODO: Initiate animations and state transitions here
+      __animations.each {|animation| animation.update() }
 
       __ready = __animations.count == 0
       if (__ready) {
@@ -118,6 +147,9 @@ class Game {
   }
   static processEvents(events) {
     return events.map {|event|
+      if (event is BoltEvent) {
+        return BoltAnimation.new(event.source, event.target)
+      }
       return event
     }.toList
   }
@@ -149,6 +181,6 @@ class PlayerSprite is Sprite {
   image { _image }
 }
 
-import "./action" for MoveAction
+import "./action" for MoveAction, BoltEvent
 import "./actor" for Enemy, Player
 import "./game" for GameModel
