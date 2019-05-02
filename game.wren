@@ -1,6 +1,4 @@
 
-
-
 class GameResult {
   progress=(v) { _progress = v}
   progress { _progress }
