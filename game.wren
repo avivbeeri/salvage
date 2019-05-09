@@ -1,3 +1,6 @@
+import "./dir" for Dir
+import "./action" for MoveAction, BoltEvent, EnergyDepletedEvent
+import "./actor" for Enemy, Player
 
 class GameResult {
   progress=(v) { _progress = v}
@@ -46,6 +49,9 @@ class GameModel {
 
   consumeEnergy(n) {
     _energy = _energy - n
+      if (_energy <= 0) {
+        addEventToResult(EnergyDepletedEvent.new())
+      }
   }
 
   isTileSolid(x, y) {
@@ -55,6 +61,10 @@ class GameModel {
 
   isTileValid(x, y) {
     return (x >= 0 && x < 7 && y >= 0 && y < 7)
+  }
+
+  doesTileContainEntity(x, y) {
+    return _entities.any {|entity| entity.x == x && entity.y == y }
   }
 
   canSeeOrth(x0, y0, x1, y1) {
@@ -96,4 +106,3 @@ class GameModel {
   }
 }
 
-import "./dir" for Dir

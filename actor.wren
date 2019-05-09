@@ -1,3 +1,8 @@
+import "./action" for
+  Action,
+  ChargeWeaponAction,
+  FireWeaponAction
+
 class Actor {
   construct new(type, x, y) {
     _x = x
@@ -51,9 +56,4 @@ class Player is Actor {
   }
   action=(v) { _action = v }
 }
-
-import "./action" for
-  Action,
-  ChargeWeaponAction,
-  FireWeaponAction
 

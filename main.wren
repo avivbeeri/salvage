@@ -1,5 +1,8 @@
 import "graphics" for Canvas, Color, ImageData
 import "input" for Keyboard
+import "./action" for MoveAction, BoltEvent, EnergyDepletedEvent
+import "./actor" for Enemy, Player
+import "./game" for GameModel
 
 var Keys = [
   "left", "right", "up", "down"
@@ -21,9 +24,9 @@ class BoltAnimation is Animation {
 
   draw() {
       var h = (_source.y-_target[1]).abs - 1
-      Canvas.rectfill(_source.x*16+12, _source.y*16+24, 8, h*16, Color.yellow)
+      Canvas.rectfill(_source.x*16+14, _source.y*16+24, 4, h*16, Color.yellow)
 
-      if (this.t > 2) {
+      if (this.t > 3) {
         this.done = true
       }
   }
@@ -51,7 +54,7 @@ class Game {
     __events = []
     __animations = []
     var entities = [
-      Player.new(3,2),
+      Player.new(1, 6),
       Enemy.new("enemy", 2,1)
     ]
 
@@ -78,7 +81,13 @@ class Game {
 
   static draw(dt) {
     Canvas.cls()
-    Canvas.print("Energy: %(__currentEnergy)", 0, 0, Color.white)
+    if (__gameOver) {
+      // TODO UI Stacking system
+      Canvas.print("Game Over", 0, 0, Color.white)
+
+    } else {
+      Canvas.print("Energy: %(__currentEnergy)", 0, 0, Color.white)
+    }
     var map = __currentMap
     for (y in 0...7) {
       for (x in 0...7) {
@@ -133,14 +142,15 @@ class Game {
       __ready = __ready && !result.progress && result.events.count == 0
       __animations = processEvents(result.events)
     } else {
-      System.print(__events)
-
       // TODO: Initiate animations and state transitions here
       __animations.each {|animation| animation.update() }
 
       __ready = __animations.count == 0
       if (__ready) {
         updateState()
+        if (__gameOver) {
+
+        }
       }
     }
 
@@ -149,9 +159,12 @@ class Game {
     return events.map {|event|
       if (event is BoltEvent) {
         return BoltAnimation.new(event.source, event.target)
+      } else if (event is EnergyDepletedEvent) {
+        __gameOver = true
+        return null
       }
       return event
-    }.toList
+    }.where {|animation| animation != null }.toList
   }
 }
 
@@ -181,6 +194,3 @@ class PlayerSprite is Sprite {
   image { _image }
 }
 
-import "./action" for MoveAction, BoltEvent
-import "./actor" for Enemy, Player
-import "./game" for GameModel

@@ -1,5 +1,12 @@
+import "./dir" for Dir
+
 class Event {}
-class BoltEvent {
+
+class EnergyDepletedEvent is Event {
+  construct new() {}
+}
+
+class BoltEvent is Event {
   source { _source }
   target { _target }
   construct new(source, tx, ty) {
@@ -63,6 +70,9 @@ class FireWeaponAction is Action {
       game.consumeEnergy(1)
       var target = targets[0]
       game.addEventToResult(BoltEvent.new(actor, target.x, target.y))
+    } else {
+      game.addEventToResult(BoltEvent.new(actor, x, y))
+
     }
     System.print("Hit: %(hit)")
     // push an animation event to the ui
@@ -103,7 +113,8 @@ class MoveAction is Action {
     if ((destX >= 0 && destX < 7) && (destY >= 0 && destY < 7)) {
       var tile = game.map[destY * 7 + destX]
       var isSolid = (tile == 1)
-      if (!isSolid) {
+      var isOccupied = game.doesTileContainEntity(destX, destY)
+      if (!isSolid && !isOccupied) {
         actor.x = destX
         actor.y = destY
         validMove = true
@@ -115,4 +126,3 @@ class MoveAction is Action {
 
 }
 
-import "./dir" for Dir
