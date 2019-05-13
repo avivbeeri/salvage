@@ -1,5 +1,6 @@
 import "./dir" for Dir
-import "./action" for MoveAction, BoltEvent, EnergyDepletedEvent
+import "./action" for MoveAction
+import "./events" for BoltEvent, EnergyDepletedEvent
 import "./actor" for Enemy, Player
 
 class GameResult {
@@ -35,14 +36,21 @@ class GameModel {
     if (action == null) {
       return GameResult.new()
     }
-    System.print("Taking turn: %(actor.type)")
-    action.bind(actor)
-    _result = GameResult.new()
-    _result.progress = action.perform()
+    while (true) {
+      System.print("Taking turn: %(actor.type)")
+      action.bind(actor)
+      _result = GameResult.new()
+      _result.progress = action.perform()
 
-    if (_result.progress) {
-      consumeEnergy(action.energy)
-      _turn = (_turn + 1) % _entities.count
+      if (_result.progress) {
+        consumeEnergy(action.energy)
+        _turn = (_turn + 1) % _entities.count
+      }
+
+      if (action.alternate == null) {
+        break
+      }
+      action = action.alternate
     }
     return _result
   }
@@ -67,33 +75,38 @@ class GameModel {
     return _entities.any {|entity| entity.x == x && entity.y == y }
   }
 
-  canSeeOrth(x0, y0, x1, y1) {
-    if (x0 == x1 || y0 == y1) {
-      var dirX = (x1 - x0) == 0 ? 0 : (x1 - x0) / (x1 - x0).abs
-      var dirY = (y1 - y0) == 0 ? 0 : (y1 - y0) / (y1 - y0).abs
-      if (dirX == 0 && dirY == 0) {
-        return true
-      }
-      var done = false
-      var success = false
-      var x = x0
-      var y = y0
-      while (!done) {
-        x = x + dirX
-        y = y + dirY
-        done = !isTileValid(x, y) || isTileSolid(x, y)
-        if (!done) {
-          done = x == x1 && y == y1
+  getEntitiesOnTile(x, y) {
+    return _entities.where {|entity| entity.x == x && entity.y == y }.toList
+  }
 
-          success = done
-        } else {
-          success = false
-        }
+  canSeeDir(dir, x0, y0, x1, y1) {
+    var dirX = dir["x"]
+    var dirY = dir["y"]
+
+    var done = false
+    var success = false
+    var x = x0
+    var y = y0
+    while (!done) {
+      x = x + dirX
+      y = y + dirY
+      done = !isTileValid(x, y) || isTileSolid(x, y)
+      if (!done) {
+        done = x == x1 && y == y1
+
+        success = done
+      } else {
+        success = false
       }
-      return success
-    } else {
-      return false
     }
+    return success
+  }
+
+  canSeeOrth(x0, y0, x1, y1) {
+    return canSeeDir(Dir["left"], x0, y0, x1, y1) ||
+    canSeeDir(Dir["down"], x0, y0, x1, y1) ||
+    canSeeDir(Dir["up"], x0, y0, x1, y1) ||
+    canSeeDir(Dir["right"], x0, y0, x1, y1)
   }
 
 

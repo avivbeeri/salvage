@@ -1,6 +1,7 @@
 import "graphics" for Canvas, Color, ImageData
 import "input" for Keyboard
-import "./action" for MoveAction, BoltEvent, EnergyDepletedEvent
+import "./action" for MoveAction
+import "./events" for BoltEvent, EnergyDepletedEvent
 import "./actor" for Enemy, Player
 import "./game" for GameModel
 
@@ -70,6 +71,7 @@ class Game {
   static updateState() {
     __currentMap = __model.map.toList
     __currentEnergy = __model.energy
+    __gameOver = __gameOverImminent || false
     __sprites = __model.entities.map {|entity|
       if (entity.type == "player") {
         return PlayerSprite.new(entity)
@@ -160,7 +162,7 @@ class Game {
       if (event is BoltEvent) {
         return BoltAnimation.new(event.source, event.target)
       } else if (event is EnergyDepletedEvent) {
-        __gameOver = true
+        __gameOverImminent = true
         return null
       }
       return event

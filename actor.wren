@@ -1,3 +1,4 @@
+import "./dir" for Dir
 import "./action" for
   Action,
   ChargeWeaponAction,
@@ -26,10 +27,11 @@ class Actor {
 class Enemy is Actor {
   construct new(type, x, y) {
     super(type, x, y)
+    _facing = Dir["down"]
   }
   getAction() {
     if (state != "charging") {
-      if (game.canSeeOrth(x, y, game.player.x, game.player.y)) {
+      if (game.canSeeDir(_facing, x, y, game.player.x, game.player.y)) {
         return ChargeWeaponAction.new()
       } else {
         return Action.new(null)

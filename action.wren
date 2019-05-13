@@ -1,26 +1,12 @@
 import "./dir" for Dir
-
-class Event {}
-
-class EnergyDepletedEvent is Event {
-  construct new() {}
-}
-
-class BoltEvent is Event {
-  source { _source }
-  target { _target }
-  construct new(source, tx, ty) {
-    _source = source
-    _target = [tx, ty]
-  }
-}
-
+import "./events" for BoltEvent, EnergyDepletedEvent
 
 class Action {
   type { _type }
   actor { _actor }
   game { _game }
   energy { 0 }
+  alternate { null }
 
   construct new(type) {
     _type = type
@@ -84,6 +70,17 @@ class FireWeaponAction is Action {
 
 }
 
+class TeleportAction is Action {
+  construct new() {
+    super("teleport")
+  }
+  perform() {
+    System.print("You win!")
+    return true
+  }
+
+}
+
 class ChargeWeaponAction is Action {
   construct new() {
     super("change")
@@ -102,7 +99,8 @@ class MoveAction is Action {
     _dir = direction
   }
 
-  energy { _energy }
+  energy { _energy || 0 }
+  alternate { _alternate || null }
 
   perform() {
     System.print("MoveAction: %(_actor)")
@@ -118,6 +116,9 @@ class MoveAction is Action {
         actor.x = destX
         actor.y = destY
         validMove = true
+        if (destX == 3 && destY == 0) {
+          _alternate = TeleportAction.new()
+        }
       }
     }
     _energy = 1
