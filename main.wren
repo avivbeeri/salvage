@@ -56,7 +56,8 @@ class Game {
     __animations = []
     var entities = [
       Player.new(1, 6),
-      Enemy.new("enemy", 2,1)
+      Enemy.new("enemy", 2,1, "down"),
+      Enemy.new("enemy", 6,5, "left")
     ]
 
     __model = GameModel.level(map, entities)

@@ -25,9 +25,9 @@ class Actor {
 }
 
 class Enemy is Actor {
-  construct new(type, x, y) {
+  construct new(type, x, y, dir) {
     super(type, x, y)
-    _facing = Dir["down"]
+    _facing = Dir[dir]
   }
   getAction() {
     if (state != "charging") {
