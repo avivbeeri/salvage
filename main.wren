@@ -4,6 +4,7 @@ import "./action" for MoveAction
 import "./events" for BoltEvent, EnergyDepletedEvent
 import "./actor" for Enemy, Player
 import "./game" for GameModel
+import "dome" for Window, Process
 
 var Keys = [
   "left", "right", "up", "down"
@@ -37,6 +38,7 @@ class BoltAnimation is Animation {
 class Game {
 
   static init() {
+    Canvas.resize(128, 128)
     __previous = {
       "left": false,
       "right": false,
@@ -127,6 +129,9 @@ class Game {
 
 
   static update() {
+    if (Keyboard.isKeyDown("escape")) {
+      Process.exit()
+    }
     if (__ready) {
       var previous = __previous
       var found = false
