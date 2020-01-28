@@ -47,12 +47,13 @@ class FireWeaponAction is Action {
           return entity != actor &&
             entity.x == x &&
             entity.y == y
-        }.toList
+        }.where {|entity| entity.type == "player"}.toList
         hit = targets.count > 0
       }
     }
     if (hit) {
       // handle hit
+
       game.consumeEnergy(1)
       var target = targets[0]
       game.addEventToResult(BoltEvent.new(actor, target.x, target.y))

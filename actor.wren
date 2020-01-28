@@ -28,7 +28,9 @@ class Enemy is Actor {
   construct new(type, x, y, dir) {
     super(type, x, y)
     _facing = Dir[dir]
+    _dir = dir
   }
+  dir { _dir }
   getAction() {
     if (state != "charging") {
       if (game.canSeeDir(_facing, x, y, game.player.x, game.player.y)) {
@@ -37,7 +39,7 @@ class Enemy is Actor {
         return Action.new(null)
       }
     } else if (state == "charging") {
-      return FireWeaponAction.new("down")
+      return FireWeaponAction.new(_dir)
 
     } else {
       return Action.new(null)

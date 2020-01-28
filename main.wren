@@ -4,11 +4,19 @@ import "./action" for MoveAction
 import "./events" for BoltEvent, EnergyDepletedEvent
 import "./actor" for Enemy, Player
 import "./game" for GameModel
+import "./dir" for Dir
 import "dome" for Window, Process
 
 var Keys = [
   "left", "right", "up", "down"
 ]
+
+var Angles = {
+  "left": 90,
+  "right": -90,
+  "up": 180,
+  "down": 0
+}
 
 class Animation {
   done=(v) { _done = v }
@@ -22,15 +30,40 @@ class BoltAnimation is Animation {
   construct new(source, target) {
     _source = source
     _target = target
+
+    if (_source.y == _target[1]) {
+      if (_source.x - _target[0] > 0) {
+        _dir = "left"
+      } else {
+        _dir = "right"
+      }
+    } else {
+      if (_source.y - _target[1] > 0) {
+        _dir = "up"
+      } else {
+        _dir = "down"
+      }
+    }
   }
 
   draw() {
+    if (_dir == "down") {
       var h = (_source.y-_target[1]).abs - 1
       Canvas.rectfill(_source.x*16+14, _source.y*16+24, 4, h*16, Color.yellow)
+    } else if (_dir == "left") {
+      var w = (_source.x-_target[0]).abs - 1
+      Canvas.rectfill(_target[0]*16+24, _target[1]*16+14, w*16, 4, Color.yellow)
+    } else if (_dir == "right") {
+      var w = (_source.x-_target[0]).abs - 1
+      Canvas.rectfill(_source.x*16+24, _source.y*16+14, w*16, 4, Color.yellow)
+    } else {
+      var h = (_source.y-_target[1]).abs - 1
+      Canvas.rectfill(_target[0]*16+14, _target[1]*16+24, 4, h*16, Color.yellow)
+    }
 
-      if (this.t > 3) {
-        this.done = true
-      }
+    if (this.t > 3) {
+      this.done = true
+    }
   }
 
 }
@@ -59,7 +92,9 @@ class Game {
     var entities = [
       Player.new(1, 6),
       Enemy.new("enemy", 2,1, "down"),
-      Enemy.new("enemy", 6,5, "left")
+      Enemy.new("enemy", 6,5, "left"),
+      Enemy.new("enemy", 2,2, "right"),
+      Enemy.new("enemy", 0,6, "up")
     ]
 
     __model = GameModel.level(map, entities)
@@ -106,9 +141,13 @@ class Game {
     __sprites.each {|sprite| sprite.draw() }
     __model.entities.each {|entity|
       if (entity.type == "enemy") {
-        Canvas.draw(__enemySprite, entity.x*16+8, entity.y*16+8)
+        __enemySprite.transform({
+          "angle": Angles[entity.dir]
+        }).draw(entity.x*16+8, entity.y*16+8)
         if (entity.state == "charging") {
-          Canvas.circlefill(entity.x*16+15, entity.y*16+24, 3, Color.yellow)
+          var dir = Dir[entity.dir]
+          Canvas.circlefill(entity.x*16+16+(8*dir["x"]), entity.y*16+16+(dir["y"]*8), 3, Color.yellow)
+          // Canvas.circlefill(entity.x*16+15, entity.y*16+24, 3, Color.yellow)
 
         }
       }
