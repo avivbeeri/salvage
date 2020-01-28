@@ -117,5 +117,9 @@ class GameModel {
       Fiber.abort("Tried to add an event without a result")
     }
   }
+
+  destroyEntity(entity) {
+    _entities = _entities.where {|e| e != entity }.toList
+  }
 }
 

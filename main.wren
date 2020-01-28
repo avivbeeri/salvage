@@ -93,7 +93,7 @@ class Game {
       Player.new(1, 6),
       Enemy.new("enemy", 2,1, "down"),
       Enemy.new("enemy", 6,5, "left"),
-      Enemy.new("enemy", 2,2, "right"),
+      Enemy.new("enemy", 2,4, "right"),
       Enemy.new("enemy", 0,6, "up")
     ]
 
