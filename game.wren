@@ -1,7 +1,7 @@
 import "./dir" for Dir
 import "./action" for MoveAction
 import "./events" for BoltEvent, EnergyDepletedEvent
-import "./actor" for Enemy, Player
+import "./actor" for Player
 
 class GameResult {
   progress=(v) { _progress = v}
@@ -63,12 +63,11 @@ class GameModel {
   }
 
   isTileSolid(x, y) {
-    var tile = _map[y * 7 + x]
-    return tile == 1
+    return _map.get(x, y)["solid"]
   }
 
   isTileValid(x, y) {
-    return (x >= 0 && x < 7 && y >= 0 && y < 7)
+    return (x >= 0 && x < map.width && y >= 0 && y < map.height)
   }
 
   doesTileContainEntity(x, y) {

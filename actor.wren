@@ -1,8 +1,5 @@
 import "./dir" for Dir
-import "./action" for
-  Action,
-  ChargeWeaponAction,
-  FireWeaponAction
+import "./action" for Action
 
 class Actor {
   construct new(type, x, y) {
@@ -22,29 +19,6 @@ class Actor {
 
   bindGame(game) { _game = game }
   game { _game }
-}
-
-class Enemy is Actor {
-  construct new(type, x, y, dir) {
-    super(type, x, y)
-    _facing = Dir[dir]
-    _dir = dir
-  }
-  dir { _dir }
-  getAction() {
-    if (state != "charging") {
-      if (game.canSeeDir(_facing, x, y, game.player.x, game.player.y)) {
-        return ChargeWeaponAction.new()
-      } else {
-        return Action.new(null)
-      }
-    } else if (state == "charging") {
-      return FireWeaponAction.new(_dir)
-
-    } else {
-      return Action.new(null)
-    }
-  }
 }
 
 class Player is Actor {

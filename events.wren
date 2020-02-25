@@ -1,5 +1,8 @@
 class Event {}
 
+class GameOverEvent is Event {
+  construct new() {}
+}
 class EnergyDepletedEvent is Event {
   construct new() {}
 }
