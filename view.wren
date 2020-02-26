@@ -75,7 +75,8 @@ class GameView {
       // TODO UI Stacking system
       Canvas.print("Game Over", 0, map.height * 8, Color.white)
     } else {
-      Canvas.print("Energy: %(_currentEnergy)", 0, map.height * 8, Color.white)
+      Canvas.print("Player: %(_model.entities[0].energy)", 0, map.height * 8, Color.white)
+      Canvas.print("Blob: %(_model.entities[1].energy)", 0, map.height * 8 + 8, Color.white)
     }
     for (y in 0...map.height) {
       for (x in 0...map.width) {
@@ -92,6 +93,8 @@ class GameView {
       if (entity.type == "player") {
         Canvas.rectfill(8 * entity.x, 8*entity.y, 8, 8, Color.black)
         Canvas.print("@", 8 * entity.x, 8 * entity.y, Color.white)
+      } else if (entity.type == "blob") {
+        Canvas.print("s", 8 * entity.x, 8 * entity.y, Color.green)
       }
     }
 

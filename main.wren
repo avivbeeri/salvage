@@ -2,7 +2,7 @@ import "graphics" for Canvas
 import "dome" for Window, Process
 import "input" for Keyboard
 import "./map" for TileMap, Tile
-import "./actor" for Player
+import "./actor" for Player, Blob
 import "./model" for GameModel
 import "./view" for GameView
 
@@ -15,7 +15,8 @@ class Game {
     var map = TileMap.init(16, 14)
     map.set(3, 0, Tile.new(2, { "teleport": true }))
     var entities = [
-      Player.new(1, 6)
+      Player.new(1, 6),
+      Blob.new(14, 5)
     ]
     __view = GameView.init(GameModel.level(map, entities))
   }

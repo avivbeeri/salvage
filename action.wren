@@ -69,7 +69,7 @@ class MoveAction is Action {
         }
       }
     }
-    _energy = 1
+    _energy = 2
     return validMove
   }
 }
