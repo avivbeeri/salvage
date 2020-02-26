@@ -21,6 +21,15 @@ class Action {
   addEvent(event) { _game.addEventToResult(event) }
 }
 
+class DanceAction is Action {
+  construct new() {
+    super("dance")
+  }
+  perform() {
+    System.print("You dance flagrantly!")
+    return true
+  }
+}
 class TeleportAction is Action {
   construct new() {
     super("teleport")
@@ -42,7 +51,7 @@ class MoveAction is Action {
   alternate { _alternate || null }
 
   perform() {
-    System.print("MoveAction: %(actor)")
+    System.print("MoveAction: %(actor.type)")
     var destX = actor.x + Dir[_dir]["x"]
     var destY = actor.y + Dir[_dir]["y"]
     var validMove = false
@@ -50,13 +59,11 @@ class MoveAction is Action {
     if (game.isTileValid(destX, destY)) {
       var tile = game.map.get(destX, destY)
       var isSolid = tile["solid"]
-      System.print(tile.data)
       var isOccupied = game.doesTileContainEntity(destX, destY)
       if (!isSolid && !isOccupied) {
         actor.x = destX
         actor.y = destY
         validMove = true
-        System.print("%(destX), %(destY)")
         if (tile["teleport"]) {
           _alternate = TeleportAction.new()
         }
