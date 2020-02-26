@@ -26,7 +26,7 @@ class DanceAction is Action {
     super("dance")
   }
   perform() {
-    System.print("You dance flagrantly!")
+    System.print("%(actor.type) dances flagrantly!")
     return true
   }
 }

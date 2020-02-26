@@ -1,5 +1,5 @@
 import "./dir" for Dir
-import "./action" for Action, MoveAction
+import "./action" for Action, MoveAction, DanceAction
 import "math" for M
 
 var SLOW_SPEED = 0
@@ -21,7 +21,7 @@ class Actor {
     _type = type
     _state = "ready"
     _energy = 0
-    _speed = FAST_SPEED
+    _speed = NORMAL_SPEED
   }
 
   // Energy Mechanics
@@ -69,7 +69,11 @@ class Blob is Actor {
     speed = SLOW_SPEED
   }
   getAction() {
-    return MoveAction.new("left")
+    if (x > 0) {
+      return MoveAction.new("left")
+    } else {
+      return DanceAction.new()
+    }
   }
 }
 
