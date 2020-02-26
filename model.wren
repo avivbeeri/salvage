@@ -33,7 +33,6 @@ class GameModel {
 
   nextTurn() {
     _turn = (_turn + 1) % _entities.count
-    System.print("----")
   }
 
   process() {
@@ -81,37 +80,6 @@ class GameModel {
   getEntitiesOnTile(x, y) {
     return _entities.where {|entity| entity.x == x && entity.y == y }.toList
   }
-
-  canSeeDir(dir, x0, y0, x1, y1) {
-    var dirX = dir["x"]
-    var dirY = dir["y"]
-
-    var done = false
-    var success = false
-    var x = x0
-    var y = y0
-    while (!done) {
-      x = x + dirX
-      y = y + dirY
-      done = !isTileValid(x, y) || isTileSolid(x, y)
-      if (!done) {
-        done = x == x1 && y == y1
-
-        success = done
-      } else {
-        success = false
-      }
-    }
-    return success
-  }
-
-  canSeeOrth(x0, y0, x1, y1) {
-    return canSeeDir(Dir["left"], x0, y0, x1, y1) ||
-    canSeeDir(Dir["down"], x0, y0, x1, y1) ||
-    canSeeDir(Dir["up"], x0, y0, x1, y1) ||
-    canSeeDir(Dir["right"], x0, y0, x1, y1)
-  }
-
 
   addEventToResult(event) {
     if (_result != null) {
