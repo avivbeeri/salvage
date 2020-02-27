@@ -34,7 +34,6 @@ class Animation {
 class GameView {
   construct init(gameModel) {
     _model = gameModel
-
     _events = []
     _animations = []
     _ready = true
@@ -78,23 +77,30 @@ class GameView {
       Canvas.print("Player: %(_model.entities[0].energy)", 0, map.height * 8, Color.white)
       Canvas.print("Blob: %(_model.entities[1].energy)", 0, map.height * 8 + 8, Color.white)
     }
+
+    var offX = (Canvas.width / 2) - (_model.player.x * 8)
+    var offY = (Canvas.height / 2) - (_model.player.y * 8)
+
+
     for (y in 0...map.height) {
       for (x in 0...map.width) {
         var tile = map.get(x, y)
         if (tile.type == 0) {
-          Canvas.print(".", x * 8, y * 8, Color.darkgray)
-        } else {
-          Canvas.print("*", x * 8, y * 8, Color.blue)
+          Canvas.print(".", offX + x * 8, offY + y * 8, Color.darkgray)
+        } else if (tile.type == 1) {
+          Canvas.rectfill(offX + x * 8, offY + y * 8, 7, 8, Color.darkgray)
+        } else if (tile.type == 2) {
+          Canvas.print("*", offX + x * 8, offY + y * 8, Color.blue)
         }
       }
     }
 
     _model.entities.each {|entity|
       if (entity.type == "player") {
-        Canvas.rectfill(8 * entity.x, 8*entity.y, 8, 8, Color.black)
-        Canvas.print("@", 8 * entity.x, 8 * entity.y, Color.white)
+        Canvas.rectfill(offX + 8 * entity.x, offY + 8*entity.y, 8, 8, Color.black)
+        Canvas.print("@", offX + 8 * entity.x, offY + 8 * entity.y, Color.white)
       } else if (entity.type == "blob") {
-        Canvas.print("s", 8 * entity.x, 8 * entity.y, Color.green)
+        Canvas.print("s", offX + 8 * entity.x, offY + 8 * entity.y, Color.green)
       }
     }
 

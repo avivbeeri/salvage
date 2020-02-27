@@ -14,6 +14,9 @@ class Game {
     Window.resize(scale * 128, scale * 128)
     var map = TileMap.init(16, 14)
     map.set(3, 0, Tile.new(2, { "teleport": true }))
+    for (x in 0...7) {
+      map.set(x, 4, Tile.new(1, { "solid": true }))
+    }
     var entities = [
       Player.new(1, 6),
       Blob.new(14, 5)
