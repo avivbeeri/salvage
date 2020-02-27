@@ -1,5 +1,6 @@
 import "graphics" for Canvas, Color, ImageData
 import "input" for Keyboard
+import "math" for M
 import "./action" for MoveAction, DanceAction
 import "./events" for GameOverEvent
 import "./model" for GameModel
@@ -77,13 +78,21 @@ class GameView {
       Canvas.print("Player: %(_model.entities[0].energy)", 0, map.height * 8, Color.white)
       Canvas.print("Blob: %(_model.entities[1].energy)", 0, map.height * 8 + 8, Color.white)
     }
-
-    var offX = (Canvas.width / 2) - (_model.player.x * 8)
-    var offY = (Canvas.height / 2) - (_model.player.y * 8)
+    var player = _model.player
 
 
-    for (y in 0...map.height) {
-      for (x in 0...map.width) {
+    var offX = (Canvas.width / 2) - (player.x * 8)
+    var offY = (Canvas.height / 2) - (player.y * 8)
+
+    var border = 7
+    var minX = M.max(player.x - border, 0)
+    var maxX = M.min(player.x + border, map.width)
+    var minY = M.max(player.y - border, 0)
+    var maxY = M.min(player.y + border, map.width)
+
+
+    for (y in minY...maxY) {
+      for (x in minX...maxX) {
         var tile = map.get(x, y)
         if (tile.type == 0) {
           Canvas.print(".", offX + x * 8, offY + y * 8, Color.darkgray)

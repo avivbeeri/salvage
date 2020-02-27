@@ -47,9 +47,9 @@ class GameModel {
     if (action == null) {
       return GameResult.new()
     }
+    _result = GameResult.new()
     while (true) {
       action.bind(actor)
-      _result = GameResult.new()
       _result.progress = action.perform()
 
       if (_result.progress) {
