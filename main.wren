@@ -15,7 +15,7 @@ class Game {
     var map = TileMap.init(16, 14)
     map.set(3, 0, Tile.new(2, { "teleport": true }))
     for (x in 0...7) {
-      map.set(x, 4, Tile.new(1, { "solid": true, "dark": true }))
+      map.set(x, 4, Tile.new(1, { "solid": true, "dark": false }))
     }
     var entities = [
       Player.new(1, 6),
