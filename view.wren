@@ -1,8 +1,8 @@
 import "graphics" for Canvas, Color, ImageData
 import "input" for Keyboard
-import "math" for M
+import "math" for M, Vec
 import "./action" for MoveAction, DanceAction, RestAction
-import "./events" for GameOverEvent
+import "./events" for GameOverEvent, MoveEvent
 import "./model" for GameModel
 import "./dir" for Dir
 import "./keys" for Key
@@ -28,9 +28,24 @@ class Animation {
   done=(v) { _done = v }
   done { _done || false }
   t { _t || 0 }
-  update() { _t = t + 1 }
+  update(view) { _t = t + 1 }
   draw() {}
 }
+class CameraAnimation is Animation {
+  construct begin() {
+  }
+  update(view) {
+    var player = view.model.player
+    var camera = view.camera
+    camera.x = camera.x - M.sign(camera.x - player.x) * 1/8
+    camera.y = camera.y - M.sign(camera.y - player.y) * 1/8
+
+    if (camera.x - player.x == 0 && camera.y - player.y == 0) {
+      done = true
+    }
+  }
+}
+
 
 
 class GameView {
@@ -41,7 +56,10 @@ class GameView {
     _ready = true
     updateState()
 
+    _camera = Vec.new(_model.player.x, _model.player.y)
   }
+  camera { _camera }
+  model { _model }
 
   update() {
     Keys.each { |key| key.update() }
@@ -57,7 +75,7 @@ class GameView {
       _ready = _ready && !result.progress && result.events.count == 0
       _animations = processEvents(result.events)
     } else {
-      _animations.each {|animation| animation.update() }
+      _animations.each {|animation| animation.update(this) }
 
       _ready = _animations.count == 0
       if (_ready) {
@@ -82,8 +100,8 @@ class GameView {
     var player = _model.player
 
 
-    var offX = (Canvas.width / 2) - (player.x * 8)
-    var offY = (Canvas.height / 2) - (player.y * 8)
+    var offX = (Canvas.width / 2) - (camera.x * 8) - 4
+    var offY = (Canvas.height / 2) - (camera.y * 8) - 4
 
     var border = 7
     var minX = M.max(player.x - border, 0)
@@ -112,8 +130,8 @@ class GameView {
         return
       }
       if (entity.type == "player") {
-        Canvas.rectfill(offX + 8 * entity.x, offY + 8*entity.y, 8, 8, Color.black)
-        Canvas.print("@", offX + 8 * entity.x, offY + 8 * entity.y, Color.white)
+        Canvas.rectfill(offX + 8 * camera.x, offY + 8*camera.y, 8, 8, Color.black)
+        Canvas.print("@", offX + 8 * camera.x, offY + 8 * camera.y, Color.white)
       } else if (entity.type == "blob") {
         Canvas.print("s", offX + 8 * entity.x, offY + 8 * entity.y, Color.green)
       }
@@ -143,6 +161,10 @@ class GameView {
       if (event is GameOverEvent) {
         _gameOverImminent = true
         return null
+      } else if (event is MoveEvent) {
+        if (event.source == _model.player) {
+          return CameraAnimation.begin()
+        }
       }
       return null
     }.where {|animation| animation != null }.toList

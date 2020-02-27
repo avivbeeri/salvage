@@ -1,5 +1,5 @@
 import "./dir" for Dir
-import "./events" for BoltEvent, EnergyDepletedEvent
+import "./events" for BoltEvent, EnergyDepletedEvent, MoveEvent
 
 class Action {
   type { _type }
@@ -78,7 +78,9 @@ class MoveAction is Action {
         }
       }
     }
-    _energy = 2
+    if (validMove) {
+      addEvent(MoveEvent.new(actor, _dir))
+    }
     return validMove
   }
 }
