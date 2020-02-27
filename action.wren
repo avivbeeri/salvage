@@ -60,7 +60,7 @@ class MoveAction is Action {
   alternate { _alternate || null }
 
   perform() {
-    System.print("MoveAction: %(actor.type)")
+    System.print("Action(%(type)): %(actor.type)")
     var destX = actor.x + Dir[_dir]["x"]
     var destY = actor.y + Dir[_dir]["y"]
     var validMove = false
@@ -78,10 +78,19 @@ class MoveAction is Action {
         }
       }
     }
+    return validMove
+  }
+}
+
+class PlayerMoveAction is MoveAction {
+  construct new(direction) {
+    super(direction)
+  }
+  perform() {
+    var validMove = super.perform()
     if (validMove) {
       addEvent(MoveEvent.new(actor, _dir))
     }
     return validMove
   }
 }
-

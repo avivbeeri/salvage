@@ -1,7 +1,7 @@
 import "graphics" for Canvas, Color, ImageData
 import "input" for Keyboard
 import "math" for M, Vec
-import "./action" for MoveAction, DanceAction, RestAction
+import "./action" for PlayerMoveAction, DanceAction, RestAction
 import "./events" for GameOverEvent, MoveEvent
 import "./model" for GameModel
 import "./dir" for Dir
@@ -12,7 +12,7 @@ var Keys = [
   "right",
   "up",
   "down"
-].map {|key| Key.new(key, true, MoveAction.new(key)) }.toList
+].map {|key| Key.new(key, true, PlayerMoveAction.new(key)) }.toList
 Keys.add(Key.new("space", true, RestAction.new()))
 Keys.add(Key.new("d", true, DanceAction.new()))
 
@@ -103,7 +103,7 @@ class GameView {
     var offX = (Canvas.width / 2) - (camera.x * 8) - 4
     var offY = (Canvas.height / 2) - (camera.y * 8) - 4
 
-    var border = 7
+    var border = 8
     var minX = M.max(player.x - border, 0)
     var maxX = M.min(player.x + border, map.width)
     var minY = M.max(player.y - border, 0)
