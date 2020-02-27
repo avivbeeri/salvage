@@ -30,6 +30,15 @@ class DanceAction is Action {
     return true
   }
 }
+class RestAction is Action {
+  construct new() {
+    super("rest")
+  }
+  perform() {
+    System.print("%(actor.type) rests.")
+    return true
+  }
+}
 class TeleportAction is Action {
   construct new() {
     super("teleport")

@@ -22,6 +22,7 @@ class Actor {
     _state = "ready"
     _energy = 0
     _speed = NORMAL_SPEED
+    _visible = false
   }
 
   // Energy Mechanics
@@ -33,6 +34,8 @@ class Actor {
   canTakeTurn { _energy >= THRESHOLD }
   // END energy mechanics
 
+  visible { _visible }
+  visible=(v) { _visible = v }
 
   x { _x }
   y { _y }
@@ -51,6 +54,7 @@ class Actor {
 class Player is Actor {
   construct new(x, y) {
     super("player", x, y)
+    visible = true
     _action = null
   }
 
@@ -65,8 +69,8 @@ class Player is Actor {
 class Blob is Actor {
   construct new(x, y) {
     super("blob", x, y)
-    _action = null
     speed = SLOW_SPEED
+    visible = true
   }
   getAction() {
     if (x > 0) {

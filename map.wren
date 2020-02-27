@@ -21,7 +21,7 @@ class Tile {
   [index]=(v) { _data[index] = v }
 }
 
-var EMPTY_TILE = Tile.new()
+var EMPTY_TILE = Tile.new(0, { "dark": true})
 
 class TileMap {
   construct init(width, height) {

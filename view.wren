@@ -1,7 +1,7 @@
 import "graphics" for Canvas, Color, ImageData
 import "input" for Keyboard
 import "math" for M
-import "./action" for MoveAction, DanceAction
+import "./action" for MoveAction, DanceAction, RestAction
 import "./events" for GameOverEvent
 import "./model" for GameModel
 import "./dir" for Dir
@@ -13,7 +13,8 @@ var Keys = [
   "up",
   "down"
 ].map {|key| Key.new(key, true, MoveAction.new(key)) }.toList
-Keys.add(Key.new("space", true, DanceAction.new()))
+Keys.add(Key.new("space", true, RestAction.new()))
+Keys.add(Key.new("d", true, DanceAction.new()))
 
 
 var Angles = {
@@ -94,17 +95,22 @@ class GameView {
     for (y in minY...maxY) {
       for (x in minX...maxX) {
         var tile = map.get(x, y)
-        if (tile.type == 0) {
-          Canvas.print(".", offX + x * 8, offY + y * 8, Color.darkgray)
-        } else if (tile.type == 1) {
-          Canvas.rectfill(offX + x * 8, offY + y * 8, 7, 8, Color.darkgray)
-        } else if (tile.type == 2) {
-          Canvas.print("*", offX + x * 8, offY + y * 8, Color.blue)
+        if (!tile["dark"]) {
+          if (tile.type == 0) {
+            Canvas.print(".", offX + x * 8, offY + y * 8, Color.darkgray)
+          } else if (tile.type == 1) {
+            Canvas.rectfill(offX + x * 8, offY + y * 8, 7, 8, Color.darkgray)
+          } else if (tile.type == 2) {
+            Canvas.print("*", offX + x * 8, offY + y * 8, Color.blue)
+          }
         }
       }
     }
 
     _model.entities.each {|entity|
+      if (!entity.visible) {
+        return
+      }
       if (entity.type == "player") {
         Canvas.rectfill(offX + 8 * entity.x, offY + 8*entity.y, 8, 8, Color.black)
         Canvas.print("@", offX + 8 * entity.x, offY + 8 * entity.y, Color.white)
