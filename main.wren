@@ -18,7 +18,7 @@ class Game {
       map.set(x, 4, Tile.new(1, { "solid": true, "dark": false }))
     }
     var entities = [
-      Player.new(1, 6),
+      Player.new(14, 6),
       Blob.new(14, 5)
     ]
     __view = GameView.init(GameModel.level(map, entities))
