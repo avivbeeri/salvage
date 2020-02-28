@@ -7,14 +7,16 @@ import "./model" for GameModel
 import "./dir" for Dir
 import "./keys" for Key
 
-var Keys = [
+var Inputs = [
   "left",
   "right",
   "up",
   "down"
-].map {|key| Key.new(key, true, PlayerMoveAction.new(key)) }.toList
-Keys.add(Key.new("space", true, RestAction.new()))
-Keys.add(Key.new("d", true, DanceAction.new()))
+].map {|key| Key.new(key, PlayerMoveAction.new(key), true) }.toList
+Inputs.add(Key.new("space", RestAction.new(), true))
+Inputs.add(Key.new("d", DanceAction.new(), true))
+
+
 
 
 var Angles = {
@@ -62,12 +64,11 @@ class GameView {
   model { _model }
 
   update() {
-    Keys.each { |key| key.update() }
+    Inputs.each { |input| input.update() }
     if (_ready) {
-      for (key in Keys) {
-        if (key.firing) {
-          System.print("action %(key.action.type)")
-          _model.player.action = key.action
+      for (input in Inputs) {
+        if (input.firing) {
+          _model.player.action = input.action
           break
         }
       }
@@ -94,8 +95,8 @@ class GameView {
       // TODO UI Stacking system
       Canvas.print("Game Over", 0, map.height * 8, Color.white)
     } else {
-      Canvas.print("Player: %(_model.entities[0].energy)", 0, map.height * 8, Color.white)
-      Canvas.print("Blob: %(_model.entities[1].energy)", 0, map.height * 8 + 8, Color.white)
+      Canvas.print("Player: %(_model.entities[0].energy)", 0,8, Color.white)
+      Canvas.print("Blob: %(_model.entities[1].energy)", 0, 0, Color.white)
     }
     var player = _model.player
 
