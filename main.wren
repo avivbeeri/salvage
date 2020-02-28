@@ -1,5 +1,5 @@
 import "graphics" for Canvas
-import "dome" for Window, Process
+import "dome" for Process
 import "input" for Keyboard
 import "./map" for TileMap, Tile
 import "./actor" for Player, Blob
@@ -9,9 +9,6 @@ import "./view" for GameView
 class Game {
 
   static init() {
-    var scale = 3
-    Canvas.resize(128, 128)
-    Window.resize(scale * 128, scale * 128)
     var map = TileMap.init(128, 128)
     map.set(3, 0, Tile.new(2, { "teleport": true }))
     for (x in 0...7) {

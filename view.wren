@@ -1,3 +1,4 @@
+import "dome" for Window
 import "graphics" for Canvas, Color, ImageData
 import "input" for Keyboard
 import "math" for M, Vec
@@ -52,6 +53,11 @@ class CameraAnimation is Animation {
 
 class GameView {
   construct init(gameModel) {
+    Window.title = "Salvage"
+    var scale = 3
+    Canvas.resize(256, 128)
+    Window.resize(scale * Canvas.width, scale * Canvas.height)
+
     _model = gameModel
     _events = []
     _animations = []
@@ -95,14 +101,16 @@ class GameView {
       // TODO UI Stacking system
       Canvas.print("Game Over", 0, map.height * 8, Color.white)
     } else {
-      Canvas.print("Player: %(_model.entities[0].energy)", 0,8, Color.white)
-      Canvas.print("Blob: %(_model.entities[1].energy)", 0, 0, Color.white)
+      // Canvas.print("Player: %(_model.entities[0].energy)", 0,8, Color.white)
+      // Canvas.print("Blob: %(_model.entities[1].energy)", 0, 0, Color.white)
     }
     var player = _model.player
 
 
-    var offX = (Canvas.width / 2) - (camera.x * 8) - 4
-    var offY = (Canvas.height / 2) - (camera.y * 8) - 4
+    var displayW = 128
+    var displayH = 128
+    var offX = (displayW / 2) - (camera.x * 8) - 4
+    var offY = (displayH / 2) - (camera.y * 8) - 4
 
     var border = 8
     var minX = M.max(player.x - border, 0)
@@ -118,9 +126,13 @@ class GameView {
           if (tile.type == 0) {
             Canvas.print(".", offX + x * 8, offY + y * 8, Color.darkgray)
           } else if (tile.type == 1) {
-            Canvas.rectfill(offX + x * 8, offY + y * 8, 7, 8, Color.darkgray)
+            Canvas.print("#", offX + x * 8, offY + y * 8, Color.darkgray)
+            // Canvas.rectfill(offX + x * 8, offY + y * 8, 7, 8, Color.darkgray)
           } else if (tile.type == 2) {
             Canvas.print("*", offX + x * 8, offY + y * 8, Color.blue)
+          } else if (tile.type == 3) {
+            Canvas.rectfill(offX + x * 8, offY + y * 8, 7, 8, Color.darkgray)
+            Canvas.print("-", offX + x * 8, offY + y * 8, Color.lightgray)
           }
         }
       }
