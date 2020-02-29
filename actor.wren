@@ -1,6 +1,6 @@
 import "./dir" for Dir
 import "./action" for Action, MoveAction, DanceAction
-import "math" for M
+import "math" for M, Vec
 
 var SLOWEST_SPEED = 0
 var SLOW_SPEED = 1
@@ -20,13 +20,13 @@ var THRESHOLD = 12
 
 class Actor {
   construct new(type, x, y) {
-    _x = x
-    _y = y
+    _pos = Vec.new(x, y)
     _type = type
     _state = "ready"
     _energy = 0
     _speed = NORMAL_SPEED
     _visible = false
+    _solid = false
   }
 
   needsInput { false }
@@ -47,11 +47,14 @@ class Actor {
 
   visible { _visible }
   visible=(v) { _visible = v }
+  solid { _solid }
+  solid=(v) { _solid = v }
 
-  x { _x }
-  y { _y }
-  x=(v) { _x = v }
-  y=(v) { _y = v }
+  x { _pos.x }
+  y { _pos.y }
+  x=(v) { _pos.x = v }
+  y=(v) { _pos.y = v }
+  pos { _pos }
   type { _type }
   getAction() { Action.new(null) }
 
@@ -67,6 +70,9 @@ class Player is Actor {
     super("player", x, y)
     visible = true
     _action = null
+    state = {
+      "facing": Dir["up"]
+    }
   }
 
   needsInput { _action == null }
@@ -93,6 +99,34 @@ class Blob is Actor {
       return MoveAction.new("left")
     } else {
       return DanceAction.new()
+    }
+  }
+}
+
+class ChargeBall is Actor {
+  construct new(actor, x, y, direction) {
+    super("chargeball", x, y)
+    speed = FAST_SPEED
+    visible = true
+    _owner = actor
+    state = "charging"
+    _direction = direction
+  }
+
+  getAction() {
+    if (state == "charging") {
+      return Action.none()
+    } else {
+      var dir = Dir[_direction] + pos
+      System.print(dir)
+      if (game.isTileValid(dir.x, dir.y)) {
+        return MoveAction.new(_direction)
+      } else {
+        System.print("destroy")
+        game.destroyEntity(this)
+        _owner.state["charge"] = null
+        return Action.none()
+      }
     }
   }
 }

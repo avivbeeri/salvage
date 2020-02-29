@@ -1,5 +1,6 @@
 import "math" for Vec, M
 class Elegant {
+  static pair(vec) { pair(vec.x, vec.y) }
   static pair(x, y) {
     if (x >= y) {
       return x * x + x + y
@@ -18,11 +19,6 @@ class Elegant {
     }
   }
 }
-
-var pair = Vec.new(42, 57)
-var hash = Elegant.pair(pair.x, pair.y)
-System.print("%(pair) => %(hash)")
-System.print("%(hash) => %(Elegant.unpair(hash))")
 
 class Tile {
   construct new() {

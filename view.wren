@@ -2,10 +2,13 @@ import "dome" for Window
 import "graphics" for Canvas, Color, ImageData
 import "input" for Keyboard
 import "math" for M, Vec
-import "./action" for PlayerMoveAction, DanceAction, RestAction
+import "./action" for PlayerMoveAction,
+  DanceAction,
+  RestAction,
+  ChargeWeaponAction,
+  FireWeaponAction
 import "./events" for GameOverEvent, MoveEvent
 import "./model" for GameModel
-import "./dir" for Dir
 import "./keys" for Key
 
 var Inputs = [
@@ -16,6 +19,8 @@ var Inputs = [
 ].map {|key| Key.new(key, PlayerMoveAction.new(key), true) }.toList
 Inputs.add(Key.new("space", RestAction.new(), true))
 Inputs.add(Key.new("d", DanceAction.new(), true))
+Inputs.add(Key.new("c", ChargeWeaponAction.new(), false))
+Inputs.add(Key.new("f", FireWeaponAction.new(), false))
 
 
 
@@ -55,7 +60,7 @@ class GameView {
   construct init(gameModel) {
     Window.title = "Salvage"
     var scale = 3
-    Canvas.resize(256, 128)
+    Canvas.resize(128, 128)
     Window.resize(scale * Canvas.width, scale * Canvas.height)
 
     _model = gameModel
@@ -147,6 +152,10 @@ class GameView {
         Canvas.print("@", offX + 8 * camera.x, offY + 8 * camera.y, Color.white)
       } else if (entity.type == "blob") {
         Canvas.print("s", offX + 8 * entity.x, offY + 8 * entity.y, Color.green)
+      } else if (entity.type == "chargeball") {
+        var diff = entity.pos - player.pos
+
+        Canvas.print("o", offX + 8 * (camera.x + diff.x), offY + 8 * (camera.y +  diff.y), Color.blue)
       }
     }
 
