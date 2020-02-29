@@ -16,7 +16,8 @@ class Game {
     }
     var entities = [
       Player.new(14, 6),
-      Blob.new(14, 5)
+      Blob.new(14, 5),
+      Blob.new(5, 3)
     ]
     __view = GameView.init(GameModel.level(map, entities))
   }

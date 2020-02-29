@@ -17,6 +17,13 @@ class EnergyDepletedEvent is Event {
   construct new() {}
 }
 
+class LogEvent is Event {
+  construct new(text) {
+    _text = text
+  }
+  text { _text }
+}
+
 class BoltEvent is Event {
   source { _source }
   target { _target }

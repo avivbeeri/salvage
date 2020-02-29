@@ -102,6 +102,7 @@ class GameModel {
 
   destroyEntity(entity) {
     _entities = _entities.where {|e| e != entity }.toList
+    entity.onDestroy()
   }
 }
 

@@ -7,7 +7,7 @@ import "./action" for PlayerMoveAction,
   RestAction,
   ChargeWeaponAction,
   FireWeaponAction
-import "./events" for GameOverEvent, MoveEvent
+import "./events" for GameOverEvent, MoveEvent, LogEvent
 import "./model" for GameModel
 import "./keys" for Key
 
@@ -60,10 +60,11 @@ class GameView {
   construct init(gameModel) {
     Window.title = "Salvage"
     var scale = 3
-    Canvas.resize(128, 128)
+    Canvas.resize(128 + 128, 128 + 64)
     Window.resize(scale * Canvas.width, scale * Canvas.height)
 
     _model = gameModel
+    _log = []
     _events = []
     _animations = []
     _ready = true
@@ -114,8 +115,9 @@ class GameView {
 
     var displayW = 128
     var displayH = 128
+    var top = (Canvas.height - displayH) / 2
     var offX = (displayW / 2) - (camera.x * 8) - 4
-    var offY = (displayH / 2) - (camera.y * 8) - 4
+    var offY = top + (displayH / 2) - (camera.y * 8) - 4
 
     var border = 8
     var minX = M.max(player.x - border, 0)
@@ -144,7 +146,7 @@ class GameView {
     }
 
     _model.entities.each {|entity|
-      if (!entity.visible) {
+      if (!entity.visible || (entity.pos - player.pos).length > border) {
         return
       }
       if (entity.type == "player") {
@@ -170,6 +172,14 @@ class GameView {
         _animations.removeAt(0)
       }
     }
+
+    Canvas.line(128, top, 128, Canvas.height, Color.purple)
+    Canvas.rectfill(129, top, 64, Canvas.height, Color.black)
+    var lineY = 0
+    for (line in _log) {
+      Canvas.print(line, 0, lineY, Color.white)
+      lineY = lineY + 8
+    }
   }
 
   // Following the Redux model, you can up
@@ -186,6 +196,9 @@ class GameView {
       if (event is GameOverEvent) {
         _gameOverImminent = true
         return null
+      } else if (event is LogEvent) {
+        _log.add(event.text)
+        _log = _log.skip(M.max(0, _log.count - 3)).toList
       } else if (event is MoveEvent) {
         if (event.source == _model.player) {
           return CameraAnimation.begin()

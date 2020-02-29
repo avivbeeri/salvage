@@ -1,4 +1,5 @@
 import "./dir" for Dir
+import "./events" for LogEvent
 import "./action" for Action, MoveAction, DanceAction, ChargeMoveAction
 import "math" for M, Vec
 
@@ -28,6 +29,8 @@ class Actor {
     _visible = false
     _solid = true
   }
+
+  onDestroy() {}
 
   needsInput { false }
   // Energy Mechanics
@@ -91,6 +94,11 @@ class Blob is Actor {
     speed = SLOWEST_SPEED
     visible = true
   }
+
+  onDestroy() {
+    game.addEventToResult(LogEvent.new("Blob was killed"))
+  }
+
   getAction() {
     if (x > 0) {
       if (game.doesTileContainEntity(x - 1, y)) {

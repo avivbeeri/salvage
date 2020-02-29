@@ -1,5 +1,5 @@
 import "./dir" for Dir
-import "./events" for BoltEvent, EnergyDepletedEvent, MoveEvent
+import "./events" for BoltEvent, EnergyDepletedEvent, MoveEvent, LogEvent
 
 class Action {
   type { _type }
@@ -45,6 +45,7 @@ class TeleportAction is Action {
   }
   perform(result) {
     System.print("You win!")
+    game.addEventToResult(LogEvent.new("You win!"))
     return true
   }
 }
