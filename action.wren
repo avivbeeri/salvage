@@ -127,6 +127,26 @@ class PlayerMoveAction is MoveAction {
     return validMove
   }
 }
+class ChargeMoveAction is MoveAction {
+  construct new(direction) {
+    super(direction)
+  }
+  perform(result) {
+    var validMove = super.perform(result)
+    if (!validMove) {
+      if (actor.state == "charging") {
+        game.destroyEntity(actor)
+      } else {
+        var target = actor.pos + Dir[direction]
+        game.getEntitiesOnTile(target.x, target.y).each {|entity| game.destroyEntity(entity) }
+        actor.pos.x = target.x
+        actor.pos.y = target.y
+        actor.state = "hit"
+      }
+    }
+    return validMove
+  }
+}
 
 class FireWeaponAction is Action {
   construct new() {
@@ -136,6 +156,7 @@ class FireWeaponAction is Action {
   perform(result) {
     if (actor.state["charge"]) {
       actor.state["charge"].state = "firing"
+      actor.state["charge"] = null
       return true
     } else {
       return false

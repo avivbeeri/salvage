@@ -1,5 +1,5 @@
 import "./dir" for Dir
-import "./action" for Action, MoveAction, DanceAction
+import "./action" for Action, MoveAction, DanceAction, ChargeMoveAction
 import "math" for M, Vec
 
 var SLOWEST_SPEED = 0
@@ -26,7 +26,7 @@ class Actor {
     _energy = 0
     _speed = NORMAL_SPEED
     _visible = false
-    _solid = false
+    _solid = true
   }
 
   needsInput { false }
@@ -96,7 +96,7 @@ class Blob is Actor {
       if (game.doesTileContainEntity(x - 1, y)) {
         return MoveAction.new(null)
       }
-      return MoveAction.new("left")
+      return MoveAction.new(null)
     } else {
       return DanceAction.new()
     }
@@ -110,23 +110,30 @@ class ChargeBall is Actor {
     visible = true
     _owner = actor
     state = "charging"
+    solid = false
     _direction = direction
   }
+
+  owner { _owner }
 
   getAction() {
     if (state == "charging") {
       return Action.none()
+    } else if (state == "hit") {
+      game.destroyEntity(this)
+      return Action.none()
     } else {
       var dir = Dir[_direction] + pos
       System.print(dir)
-      if (game.isTileValid(dir.x, dir.y)) {
-        return MoveAction.new(_direction)
+      // if (game.isTileValid(dir.x, dir.y)) {
+      return ChargeMoveAction.new(_direction)
+        /*
       } else {
-        System.print("destroy")
         game.destroyEntity(this)
         _owner.state["charge"] = null
         return Action.none()
       }
+      */
     }
   }
 }

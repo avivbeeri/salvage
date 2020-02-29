@@ -153,9 +153,12 @@ class GameView {
       } else if (entity.type == "blob") {
         Canvas.print("s", offX + 8 * entity.x, offY + 8 * entity.y, Color.green)
       } else if (entity.type == "chargeball") {
-        var diff = entity.pos - player.pos
-
-        Canvas.print("o", offX + 8 * (camera.x + diff.x), offY + 8 * (camera.y +  diff.y), Color.blue)
+        if (entity.state == "charging") {
+          var diff = entity.pos - player.pos
+          Canvas.print("o", offX + 8 * (camera.x + diff.x), offY + 8 * (camera.y +  diff.y), Color.blue)
+        } else {
+          Canvas.print("o", offX + 8 * (entity.x), offY + 8 * (entity.y), Color.blue)
+        }
       }
     }
 
