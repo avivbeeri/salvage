@@ -6,16 +6,18 @@ import "./actor" for Player, Blob
 import "./model" for GameModel
 import "./view" for GameView
 
-class Game {
+import "./tiles" for Tiles
 
+class Game {
   static init() {
-    var map = TileMap.init(128, 128)
-    map.set(3, 0, Tile.new(2, { "teleport": true }))
+    var map = TileMap.init(128, 128, Tiles.floor)
+    map.set(3, 0, Tiles.teleport)
     for (x in 0...7) {
-      map.set(x, 4, Tile.new(1, { "solid": true, "dark": false }))
+      map.set(x, 4, Tiles.wall)
     }
+    map.set(14, 4, Tiles.sludge)
     var entities = [
-      Player.new(14, 6),
+      Player.new(14, 8),
       Blob.new(14, 5),
       Blob.new(5, 3)
     ]

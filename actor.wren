@@ -3,6 +3,8 @@ import "./events" for LogEvent
 import "./action" for Action, MoveAction, DanceAction, ChargeMoveAction
 import "math" for M, Vec
 
+var FULL_POWER = 1560
+
 var SLOWEST_SPEED = 0
 var SLOW_SPEED = 1
 var NORMAL_SPEED = 3
@@ -22,12 +24,12 @@ var THRESHOLD = 12
 class Actor {
   construct new(type, x, y) {
     _pos = Vec.new(x, y)
-    _type = type
-    _state = "ready"
-    _energy = 0
-    _speed = NORMAL_SPEED
-    _visible = false
-    _solid = true
+      _type = type
+      _state = "ready"
+      _energy = 0
+      _speed = NORMAL_SPEED
+      _visible = false
+      _solid = true
   }
 
   onDestroy() {}
@@ -42,7 +44,7 @@ class Actor {
       System.print("%(this.type) gains %(GAINS[this.speed])")
     }
     _energy = _energy + GAINS[this.speed]
-    return canTakeTurn
+      return canTakeTurn
   }
   consume() { _energy = _energy % THRESHOLD }
   canTakeTurn { _energy >= THRESHOLD }
@@ -60,6 +62,9 @@ class Actor {
   pos { _pos }
   type { _type }
   getAction() { Action.new(null) }
+  finishTurn(action) {
+    consume()
+  }
 
   state { _state }
   state=(s) { _state = s }
@@ -71,21 +76,38 @@ class Actor {
 class Player is Actor {
   construct new(x, y) {
     super("player", x, y)
-    visible = true
-    _action = null
+      visible = true
+      _action = null
+      _power = FULL_POWER
     state = {
-      "facing": Dir["up"]
+      "facing": "up"
     }
   }
 
+  power { _power }
+  power=(v) { _power = v }
   needsInput { _action == null }
 
+  action=(v) { _action = v }
   getAction() {
     var action = _action
     _action = null
     return action
   }
-  action=(v) { _action = v }
+
+  finishTurn(action) {
+    if (action is MoveAction) {
+      var tile = game.getTileAt(pos)
+      tile["cost"]
+      power = M.max(0, power - (tile["cost"] || 1))
+    } else {
+      power = M.max(0, power - 1)
+    }
+    if (state["charge"]) {
+      power = M.max(0, power - 1)
+    }
+    super.finishTurn(action)
+  }
 }
 
 class Blob is Actor {
@@ -133,15 +155,7 @@ class ChargeBall is Actor {
     } else {
       var dir = Dir[_direction] + pos
       System.print(dir)
-      // if (game.isTileValid(dir.x, dir.y)) {
       return ChargeMoveAction.new(_direction)
-        /*
-      } else {
-        game.destroyEntity(this)
-        _owner.state["charge"] = null
-        return Action.none()
-      }
-      */
     }
   }
 }

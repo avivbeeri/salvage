@@ -31,6 +31,14 @@ class Tile {
     init_(type, data)
   }
 
+  copy {
+    var data = {}
+    for (key in _data.keys) {
+      data[key] = _data[key]
+    }
+    return Tile.new(_type, data)
+  }
+
   init_(type, data) {
     _type = type
     _data = data
@@ -46,6 +54,11 @@ class Tile {
 var EMPTY_TILE = Tile.new(0, { "dark": false })
 
 class TileMap {
+  construct init(width, height, tile) {
+    _width = width
+    _height = height
+    _tiles = List.filled(_width * _height, tile.copy)
+  }
   construct init(width, height) {
     _width = width
     _height = height

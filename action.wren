@@ -1,3 +1,4 @@
+import "math" for M
 import "./dir" for Dir
 import "./events" for BoltEvent, EnergyDepletedEvent, MoveEvent, LogEvent
 
@@ -36,9 +37,16 @@ class RestAction is Action {
   }
   perform(result) {
     System.print("%(actor.type) rests.")
+    import "./actor" for Player
+    if (actor is Player) {
+      if (actor.state["charge"]) {
+        result.alternate = FireWeaponAction.new()
+      }
+    }
     return true
   }
 }
+
 class TeleportAction is Action {
   construct new() {
     super("teleport")
@@ -49,6 +57,7 @@ class TeleportAction is Action {
     return true
   }
 }
+
 class ChargeWeaponAction is Action {
   construct new() {
     super("charge")
@@ -59,6 +68,10 @@ class ChargeWeaponAction is Action {
       import "./actor" for ChargeBall
       var facing = actor.state["facing"]
       var pos = actor.pos + Dir[actor.state["facing"]]
+      var isOccupied = game.getEntitiesOnTile(pos.x, pos.y).where {|entity| entity.solid }.count > 0
+      if (isOccupied || game.isTileSolid(pos.x, pos.y)) {
+        return false
+      }
       var ball = ChargeBall.new(actor, pos.x, pos.y, facing)
       ball.bindGame(actor.game)
       actor.state["charge"] = ball
@@ -114,7 +127,6 @@ class PlayerMoveAction is MoveAction {
     super(direction)
   }
   perform(result) {
-
     var validMove = super.perform(result)
     if (validMove) {
       if (actor.state["charge"]) {
@@ -128,6 +140,7 @@ class PlayerMoveAction is MoveAction {
     return validMove
   }
 }
+
 class ChargeMoveAction is MoveAction {
   construct new(direction) {
     super(direction)

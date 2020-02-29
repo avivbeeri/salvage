@@ -11,6 +11,10 @@ import "./events" for GameOverEvent, MoveEvent, LogEvent
 import "./model" for GameModel
 import "./keys" for Key
 
+
+var TILE_WIDTH = 8
+var TILE_HEIGHT = 8
+
 var Inputs = [
   "left",
   "right",
@@ -22,15 +26,6 @@ Inputs.add(Key.new("d", DanceAction.new(), true))
 Inputs.add(Key.new("c", ChargeWeaponAction.new(), false))
 Inputs.add(Key.new("f", FireWeaponAction.new(), false))
 
-
-
-
-var Angles = {
-  "left": 90,
-  "right": -90,
-  "up": 180,
-  "down": 0
-}
 
 class Animation {
   done=(v) { _done = v }
@@ -45,11 +40,13 @@ class CameraAnimation is Animation {
   update(view) {
     var player = view.model.player
     var camera = view.camera
-    camera.x = camera.x - M.sign(camera.x - player.x) * 1/8
-    camera.y = camera.y - M.sign(camera.y - player.y) * 1/8
+    camera.x = (camera.x - M.sign(camera.x - player.x) * (1/ TILE_WIDTH))
+    camera.y = (camera.y - M.sign(camera.y - player.y) * (1/ TILE_HEIGHT))
 
-    if (camera.x - player.x == 0 && camera.y - player.y == 0) {
+    if ((camera.x - player.x).abs < 0.1 && (camera.y - player.y).abs < 0.1) {
       done = true
+      camera.x = M.round(camera.x)
+      camera.y = M.round(camera.y)
     }
   }
 }
@@ -60,7 +57,7 @@ class GameView {
   construct init(gameModel) {
     Window.title = "Salvage"
     var scale = 3
-    Canvas.resize(128 + 128, 128 + 64)
+    Canvas.resize(128+64, 128 + 64)
     Window.resize(scale * Canvas.width, scale * Canvas.height)
 
     _model = gameModel
@@ -100,88 +97,6 @@ class GameView {
 
   }
 
-  draw() {
-    Canvas.cls()
-    var map = _currentMap
-    if (_gameOver) {
-      // TODO UI Stacking system
-      Canvas.print("Game Over", 0, map.height * 8, Color.white)
-    } else {
-      // Canvas.print("Player: %(_model.entities[0].energy)", 0,8, Color.white)
-      // Canvas.print("Blob: %(_model.entities[1].energy)", 0, 0, Color.white)
-    }
-    var player = _model.player
-
-
-    var displayW = 128
-    var displayH = 128
-    var top = (Canvas.height - displayH) / 2
-    var offX = (displayW / 2) - (camera.x * 8) - 4
-    var offY = top + (displayH / 2) - (camera.y * 8) - 4
-
-    var border = 8
-    var minX = M.max(player.x - border, 0)
-    var maxX = M.min(player.x + border, map.width)
-    var minY = M.max(player.y - border, 0)
-    var maxY = M.min(player.y + border, map.width)
-
-
-    for (y in minY...maxY) {
-      for (x in minX...maxX) {
-        var tile = map.get(x, y)
-        if (!tile["dark"]) {
-          if (tile.type == 0) {
-            Canvas.print(".", offX + x * 8, offY + y * 8, Color.darkgray)
-          } else if (tile.type == 1) {
-            Canvas.print("#", offX + x * 8, offY + y * 8, Color.darkgray)
-            // Canvas.rectfill(offX + x * 8, offY + y * 8, 7, 8, Color.darkgray)
-          } else if (tile.type == 2) {
-            Canvas.print("*", offX + x * 8, offY + y * 8, Color.blue)
-          } else if (tile.type == 3) {
-            Canvas.rectfill(offX + x * 8, offY + y * 8, 7, 8, Color.darkgray)
-            Canvas.print("-", offX + x * 8, offY + y * 8, Color.lightgray)
-          }
-        }
-      }
-    }
-
-    _model.entities.each {|entity|
-      if (!entity.visible || (entity.pos - player.pos).length > border) {
-        return
-      }
-      if (entity.type == "player") {
-        Canvas.rectfill(offX + 8 * camera.x, offY + 8*camera.y, 8, 8, Color.black)
-        Canvas.print("@", offX + 8 * camera.x, offY + 8 * camera.y, Color.white)
-      } else if (entity.type == "blob") {
-        Canvas.print("s", offX + 8 * entity.x, offY + 8 * entity.y, Color.green)
-      } else if (entity.type == "chargeball") {
-        if (entity.state == "charging") {
-          var diff = entity.pos - player.pos
-          Canvas.print("o", offX + 8 * (camera.x + diff.x), offY + 8 * (camera.y +  diff.y), Color.blue)
-        } else {
-          Canvas.print("o", offX + 8 * (entity.x), offY + 8 * (entity.y), Color.blue)
-        }
-      }
-    }
-
-    // Render one animation at a time
-    if (_animations.count > 0) {
-      var a = _animations[0]
-      a.draw()
-      if (a.done) {
-        _animations.removeAt(0)
-      }
-    }
-
-    Canvas.line(128, top, 128, Canvas.height, Color.purple)
-    Canvas.rectfill(129, top, 64, Canvas.height, Color.black)
-    var lineY = 0
-    for (line in _log) {
-      Canvas.print(line, 0, lineY, Color.white)
-      lineY = lineY + 8
-    }
-  }
-
   // Following the Redux model, you can up
   updateState() {
     _currentMap = _model.map
@@ -207,5 +122,104 @@ class GameView {
       return null
     }.where {|animation| animation != null }.toList
   }
+
+  draw() {
+    Canvas.cls()
+    var map = _currentMap
+    if (_gameOver) {
+      // TODO UI Stacking system
+      Canvas.print("Game Over", 0, map.height * 8, Color.white)
+    } else {
+      // Canvas.print("Player: %(_model.entities[0].energy)", 0,8, Color.white)
+      // Canvas.print("Blob: %(_model.entities[1].energy)", 0, 0, Color.white)
+    }
+    var player = _model.player
+
+
+    var displayW = 128
+    var displayH = 128
+    var top = (Canvas.height - displayH) / 2
+    var left = 4
+    var offX = left + (displayW / 2) - (camera.x * TILE_WIDTH) - 4
+    var offY = top + (displayH / 2) - (camera.y * TILE_HEIGHT) - 4
+
+    var border = 8
+    var minX = M.max(player.x - border, 0)
+    var maxX = M.min(player.x + border, map.width)
+    var minY = M.max(player.y - border, 0)
+    var maxY = M.min(player.y + border, map.height)
+
+
+    for (y in minY...maxY) {
+      for (x in minX...maxX) {
+        var tile = map.get(x, y)
+        if (!tile["dark"]) {
+        // if (!tile["dark"] && (Vec.new(x, y) - camera).length < border) {
+          if (tile.type == ".") {
+            Canvas.print(".", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
+          } else if (tile.type == "#") {
+            Canvas.print("#", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
+            // Canvas.rectfill(offX + x * 8, offY + y * 8, 7, 8, Color.darkgray)
+          } else if (tile.type == "*") {
+            Canvas.print("*", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.blue)
+          } else if (tile.type == "~") {
+            Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, Color.brown)
+            Canvas.print("~", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT + 3, Color.white)
+          } else if (tile.type == "+") {
+            Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, Color.darkgray)
+            Canvas.print("-", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.lightgray)
+          }
+        }
+      }
+    }
+
+    _model.entities.each {|entity|
+      var diff = entity.pos - camera
+      if (!entity.visible ||
+        (entity.x >= maxX) || entity.x < minX ||
+        (entity.y >= maxY) || entity.y < minY) {
+        return
+      }
+      if (entity.type == "player") {
+        Canvas.rectfill(offX + TILE_WIDTH * camera.x, offY + TILE_HEIGHT * camera.y, TILE_WIDTH, TILE_HEIGHT, Color.black)
+        Canvas.print("@", offX + TILE_WIDTH * camera.x, offY + TILE_HEIGHT * camera.y, Color.white)
+      } else if (entity.type == "blob") {
+        Canvas.print("s", offX + TILE_WIDTH * entity.x, offY + TILE_HEIGHT * entity.y, Color.green)
+      } else if (entity.type == "chargeball") {
+        if (entity.state == "charging") {
+          var diff = entity.pos - player.pos
+          Canvas.print("o", offX + TILE_WIDTH * (camera.x + diff.x), offY + TILE_HEIGHT * (camera.y +  diff.y), Color.blue)
+        } else {
+          Canvas.print("o", offX + TILE_WIDTH * (entity.x), offY + TILE_HEIGHT * (entity.y), Color.blue)
+        }
+      }
+    }
+    Canvas.rectfill(left, top - 12, displayW, TILE_HEIGHT, Color.black)
+
+    // Render one animation at a time
+    if (_animations.count > 0) {
+      var a = _animations[0]
+      a.draw()
+      if (a.done) {
+        _animations.removeAt(0)
+      }
+    }
+
+    Canvas.rectfill(129, top, 64, Canvas.height, Color.black)
+    Canvas.line(129, top, 129, Canvas.height, Color.purple)
+    var lineY = 0
+    for (line in _log) {
+      Canvas.print(line, 0, lineY, Color.white)
+      lineY = lineY + 8
+    }
+
+    Canvas.print("[", 0, top + 128, Color.white)
+    for (pip in 0...(player.power / 40).ceil) {
+      Canvas.print("|", 3 * (1 + pip), top + 128, Color.blue)
+    }
+    Canvas.print("]", 8 + 3 * 38, top + 128, Color.white)
+    Canvas.print(player.power.toString, 0, top + 136, Color.white)
+  }
+
 }
 

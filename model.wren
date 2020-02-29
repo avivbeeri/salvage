@@ -69,15 +69,20 @@ class GameModel {
 
     // Some actions should consume energy on failure
     if (_result.progress) {
-      actor.consume()
+      actor.finishTurn(action)
       nextTurn()
     }
 
     return _result
   }
 
+  getTileAt(vec) { getTileAt(vec.x, vec.y) }
+  getTileAt(x, y) {
+    return _map.get(x, y)
+
+  }
   isTileSolid(x, y) {
-    return _map.get(x, y)["solid"]
+    return getTileAt(x, y)["solid"]
   }
 
   isTileValid(x, y) {
