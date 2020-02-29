@@ -1,3 +1,29 @@
+import "math" for Vec, M
+class Elegant {
+  static pair(x, y) {
+    if (x >= y) {
+      return x * x + x + y
+    } else {
+      return y * y + x
+    }
+  }
+
+  static unpair(z) {
+    var sqrtz = M.floor(z.sqrt)
+    var sqz = sqrtz * sqrtz
+    if ((z - sqz) > sqrtz) {
+      return Vec.new(sqrtz, z - sqz - sqrtz)
+    } else {
+      return Vec.new(z- sqz, sqrtz)
+    }
+  }
+}
+
+var pair = Vec.new(42, 57)
+var hash = Elegant.pair(pair.x, pair.y)
+System.print("%(pair) => %(hash)")
+System.print("%(hash) => %(Elegant.unpair(hash))")
+
 class Tile {
   construct new() {
     init_(0, {})
