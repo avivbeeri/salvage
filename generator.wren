@@ -6,7 +6,8 @@ import "./tiles" for Tiles
 
 var NameIndex = 0
 var Roomnames = [
-  "cockpit",
+  "corridor",
+  "bridge",
   "cargo hold",
   "kitchen",
   "common area",
@@ -17,7 +18,13 @@ var Roomnames = [
   "waste processing",
   "hydroponics bay",
   "observation deck",
-  "canteen"
+  "canteen",
+  "medical bay",
+  "brig",
+  "containment room",
+  "gravitational core",
+  "air processing",
+  "airlock"
 ]
 var R = Random.new(12345)
 

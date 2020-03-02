@@ -34,6 +34,18 @@ class Animation {
   update(view) { _t = t + 1 }
   draw() {}
 }
+
+class WaitAnimation is Animation {
+  construct begin() {
+  }
+  update(view) {
+    super.update(view)
+    if (t > 60) {
+      done = true
+    }
+  }
+}
+
 class CameraAnimation is Animation {
   construct begin() {
   }
@@ -63,7 +75,7 @@ class GameView {
     _model = gameModel
     _log = []
     _events = []
-    _animations = []
+    _animations = [ WaitAnimation.begin() ]
     _ready = true
     updateState()
 
@@ -73,28 +85,28 @@ class GameView {
   model { _model }
 
   update() {
+    _ready = _animations.count == 0
+
     Inputs.each { |input| input.update() }
-    for (input in Inputs) {
-      if (input.firing) {
-        _model.player.action = input.action
-        break
-      }
-    }
     if (_ready) {
+      if (_gameOver) {
+      }
+      for (input in Inputs) {
+        if (input.firing) {
+          _model.player.action = input.action
+          break
+        }
+      }
       var result = _model.process()
       _ready = _ready && !result.progress && result.events.count == 0
       _animations = processEvents(result.events)
     } else {
-      _animations.each {|animation| animation.update(this) }
-
-      _ready = _animations.count == 0
-      if (_ready) {
+      _animations[0].update(this)
+      if (_animations[0].done) {
         updateState()
-        if (_gameOver) {
-        }
+        _animations.removeAt(0)
       }
     }
-
   }
 
   // Following the Redux model, you can up
@@ -203,11 +215,7 @@ class GameView {
 
     // Render one animation at a time
     if (_animations.count > 0) {
-      var a = _animations[0]
-      a.draw()
-      if (a.done) {
-        _animations.removeAt(0)
-      }
+      _animations[0].draw()
     }
 
     Canvas.rectfill(129, top, 64, Canvas.height, Color.black)

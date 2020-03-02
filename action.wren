@@ -1,6 +1,7 @@
 import "math" for M
 import "./dir" for Dir
 import "./events" for BoltEvent, EnergyDepletedEvent, MoveEvent, LogEvent
+import "./tiles" for Tiles
 
 class Action {
   type { _type }
@@ -69,7 +70,8 @@ class ChargeWeaponAction is Action {
       var facing = actor.state["facing"]
       var pos = actor.pos + Dir[actor.state["facing"]]
       var isOccupied = game.getEntitiesOnTile(pos.x, pos.y).where {|entity| entity.solid }.count > 0
-      if (isOccupied || game.isTileSolid(pos.x, pos.y)) {
+      var tile = game.getTileAt(pos)
+      if (isOccupied || tile["solid"] || tile["obscure"]) {
         return false
       }
       var ball = ChargeBall.new(actor, pos.x, pos.y, facing)
@@ -130,9 +132,18 @@ class PlayerMoveAction is MoveAction {
     var validMove = super.perform(result)
     if (validMove) {
       if (actor.state["charge"]) {
+
         var charge = actor.state["charge"]
+        var chargeMove = ChargeMoveAction.new(direction)
+        chargeMove.bind(charge)
+        var chargeOkay = chargeMove.perform(result)
+        if (!chargeOkay) {
+          actor.state["charge"] = null
+        }
+        /*
         charge.x = charge.x + Dir[direction].x
         charge.y = charge.y + Dir[direction].y
+        */
       }
       actor.state["facing"] = direction
       addEvent(MoveEvent.new(actor, direction))
@@ -156,6 +167,12 @@ class ChargeMoveAction is MoveAction {
         actor.pos.x = target.x
         actor.pos.y = target.y
         actor.state = "hit"
+      }
+    } else {
+      var tile = game.getTileAt(actor.pos)
+      if (tile["obscure"]) {
+        game.destroyEntity(actor)
+        validMove = false
       }
     }
     return validMove

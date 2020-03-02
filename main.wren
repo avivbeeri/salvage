@@ -1,3 +1,4 @@
+import "graphics" for Canvas, Color
 import "dome" for Process
 import "input" for Keyboard
 import "./model" for GameModel
@@ -9,13 +10,17 @@ class Game {
   static init() {
     var level = StaticRoomGenerator.generate([])
     __view = GameView.init(GameModel.level(level))
+    __view = TitleMenu.init()
   }
 
   static update() {
     if (Keyboard.isKeyDown("escape")) {
       Process.exit()
     }
-    __view.update()
+    var next = __view.update()
+    if (next) {
+      __view = next
+    }
   }
 
   static draw(dt) {
@@ -24,3 +29,22 @@ class Game {
 
 }
 
+
+class TitleMenu {
+  construct init() {}
+  update() {
+    if (Keyboard.isKeyDown("space")) {
+      var level = StaticRoomGenerator.generate([])
+      var view = GameView.init(GameModel.level(level))
+      return view
+    }
+    return null
+  }
+  draw() {
+    var left = 15
+    var top = 10
+    Canvas.print("Press space to begin", left, top, Color.white)
+    Canvas.print("    the mission", left, top + 8, Color.white)
+  }
+
+}

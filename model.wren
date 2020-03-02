@@ -89,16 +89,6 @@ class GameModel {
     return _result
   }
 
-  recalculateA() {
-    var distance = 8
-    for (y in 0...distance) {
-      for (x in 0...y) {
-        var pos = Vec.new(x, -y) + player.pos
-
-      }
-    }
-  }
-
   recalculate() {
     var min = _player.pos - Vec.new(8, 8)
     var max = _player.pos + Vec.new(8, 8)
@@ -138,8 +128,8 @@ class GameModel {
       if (entity != _player) {
         var points = LineVisitor.walk(_player.pos, entity.pos)
         var visible = true
-        for (point in points) {
-          var tile = getTileAt(point)
+        for (index in 1...points.count) {
+          var tile = getTileAt(points[index])
           if (tile["obscure"]) {
             visible = false
             break
