@@ -74,13 +74,13 @@ class GameView {
 
   update() {
     Inputs.each { |input| input.update() }
-    if (_ready) {
-      for (input in Inputs) {
-        if (input.firing) {
-          _model.player.action = input.action
-          break
-        }
+    for (input in Inputs) {
+      if (input.firing) {
+        _model.player.action = input.action
+        break
       }
+    }
+    if (_ready) {
       var result = _model.process()
       _ready = _ready && !result.progress && result.events.count == 0
       _animations = processEvents(result.events)
@@ -153,7 +153,7 @@ class GameView {
     for (y in minY...maxY) {
       for (x in minX...maxX) {
         var tile = map.get(x, y)
-        if (!tile["dark"]) {
+        if (tile["light"] > 0) {
         // if (!tile["dark"] && (Vec.new(x, y) - camera).length < border) {
           if (tile.type == ".") {
             Canvas.print(".", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
@@ -166,8 +166,13 @@ class GameView {
             Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, Color.brown)
             Canvas.print("~", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT + 3, Color.white)
           } else if (tile.type == "+") {
-            Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, Color.darkgray)
-            Canvas.print("-", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.lightgray)
+            // What kind of door is it?
+            var color = Color.darkgreen
+            if (tile["locked"]) {
+              color = Color.hex("#800000")
+            }
+            Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, color)
+            Canvas.print("+", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.black)
           }
         }
       }
@@ -181,7 +186,7 @@ class GameView {
         return
       }
       if (entity.type == "player") {
-        Canvas.rectfill(offX + TILE_WIDTH * camera.x, offY + TILE_HEIGHT * camera.y, TILE_WIDTH, TILE_HEIGHT, Color.black)
+        Canvas.rectfill(offX + TILE_WIDTH * camera.x, offY + TILE_HEIGHT * camera.y, TILE_WIDTH, TILE_HEIGHT, Color.rgb(0, 0, 0, 128))
         Canvas.print("@", offX + TILE_WIDTH * camera.x, offY + TILE_HEIGHT * camera.y, Color.white)
       } else if (entity.type == "blob") {
         Canvas.print("s", offX + TILE_WIDTH * entity.x, offY + TILE_HEIGHT * entity.y, Color.green)

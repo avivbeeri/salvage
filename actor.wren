@@ -40,9 +40,6 @@ class Actor {
   speed=(v) { _speed = v }
   energy { _energy }
   gain() {
-    if (type != "player") {
-      System.print("%(this.type) gains %(GAINS[this.speed])")
-    }
     _energy = _energy + GAINS[this.speed]
       return canTakeTurn
   }
