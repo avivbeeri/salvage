@@ -88,6 +88,15 @@ class Room {
     }
   }
 
+  setTileProperties(pairs) {
+    // Expect pairs as a list of 2-element lists of key=value
+    _tiles.each {|tile|
+      for (pair in pairs) {
+        tile[pair[0]] = pair[1]
+      }
+    }
+  }
+
   setTileProperty(key, value) {
     _tiles.each {|tile| tile[key] = value }
   }

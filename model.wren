@@ -159,8 +159,7 @@ class GameModel {
       }
     }
     lighting.each {|room|
-      room.setTileProperty("light", 2)
-      room.setTileProperty("seen", true)
+      room.setTileProperties([ ["light", 2], [ "seen", true ] ])
     }
   }
 
