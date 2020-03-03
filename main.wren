@@ -5,11 +5,11 @@ import "./model" for GameModel
 import "./view" for GameView
 import "./generator" for StaticRoomGenerator
 
-
 class Game {
   static init() {
-    var level = StaticRoomGenerator.generate([])
-    __view = GameView.init(GameModel.level(level))
+    // var level = StaticRoomGenerator.generate([])
+    // __view = GameView.init(GameModel.level(level))
+    Canvas.resize(128+64, 128 + 64)
     __view = TitleMenu.init()
   }
 

@@ -6,7 +6,10 @@ class Tiles {
   static wall { Tile.new("#", { "solid": true, "light": 0, "obscure": true }) }
   static door { Tile.new("+", { "solid": false, "light": 0, "obscure": true }) }
   static lockedDoor { Tile.new("+", { "solid": true, "light": 0, "locked": true, "obscure": true}) }
-  static teleport { Tile.new("*", { "teleport": true, "light": 0 }) }
   static sludge { Tile.new("~", { "cost": 3, "light": 0 }) }
+
+  // Features
+  static teleport { Tile.new("*", { "teleport": true, "light": 0 }) }
+  static console { Tile.new("=", { "solid": true, "teleport": true, "light": 0 }) }
 }
 

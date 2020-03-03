@@ -144,8 +144,9 @@ class PlayerMoveAction is MoveAction {
         charge.x = charge.x + Dir[direction].x
         charge.y = charge.y + Dir[direction].y
         */
+      } else {
+        actor.state["facing"] = direction
       }
-      actor.state["facing"] = direction
       addEvent(MoveEvent.new(actor, direction))
     }
     return validMove

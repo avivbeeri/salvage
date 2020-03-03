@@ -28,6 +28,14 @@ var Roomnames = [
 ]
 var R = Random.new(12345)
 
+class Feature {
+  construct new(type, pos) {
+    _type = type
+    _pos = pos
+  }
+  pos { _pos }
+  type { _type }
+}
 
 class Room {
   construct new(pos, size) {
@@ -38,8 +46,10 @@ class Room {
     NameIndex = (NameIndex + 1) % Roomnames.count
     _doors = []
     _tiles = []
-    _walls = []
+    _features = []
   }
+
+  map=(v) { _map = v }
 
   pos { _pos }
   size { _size }
@@ -47,8 +57,11 @@ class Room {
   height { _size.y }
   doors { _doors }
   tiles { _tiles }
-  walls { _walls }
+  features { _features }
   name { _name }
+
+  light { _light }
+  light=(v) { _light = v }
 
   isInRoom(vec) { isInRoom(vec.x, vec.y) }
   isInRoom(x, y) {
@@ -57,6 +70,22 @@ class Room {
       x < max.x &&
       y >= pos.y &&
       y < max.y
+  }
+
+  addTile(x, y, tile) {
+    if (!_map) {
+      Fiber.abort("No map bound to room")
+    }
+    if (_map.get(x, y).type != tile.type) {
+      _map.set(x, y, tile)
+    }
+    tiles.add(_map.get(x, y))
+  }
+
+  setDarkness() {
+    _tiles.each {|tile|
+      tile["light"] = tile["seen"] ? 1 : 0
+    }
   }
 
   setTileProperty(key, value) {
@@ -105,7 +134,9 @@ class StaticRoomGenerator {
     */
 
     var room1 = Room.new(Vec.new(), Vec.new(ROOM_WIDTH, ROOM_HEIGHT))
+    room1.light = false
     var room2 = Room.new(Vec.new(ROOM_WIDTH - 1, ROOM_HEIGHT / 2), Vec.new(ROOM_WIDTH, 3))
+    room2.light = true
     var room3 = Room.new(Vec.new(ROOM_WIDTH * 2 - 2, 0), Vec.new(ROOM_WIDTH, ROOM_HEIGHT))
     room1.doors.add(Vec.new(ROOM_WIDTH - 1, ROOM_HEIGHT / 2 + 1))
     room2.doors.add(Vec.new(ROOM_WIDTH*2 - 2, ROOM_HEIGHT / 2 + 1))
@@ -113,17 +144,16 @@ class StaticRoomGenerator {
 
     var map = TileMap.init(320, 320, Tiles.empty)
     for (room in rooms) {
+      room.map = map
       var start = room.pos
       var max = room.pos + room.size - Vec.new(1, 1)
       for (y in start.y .. max.y) {
         for (x in start.x .. max.x) {
           if (map.get(x, y).type == Tiles.empty.type) {
             if (y == start.y || y == max.y || x == start.x || x == max.x) {
-              map.set(x, y, Tiles.wall)
-              room.tiles.add(map.get(x, y))
+              room.addTile(x, y, Tiles.wall)
             } else {
-              map.set(x, y, Tiles.floor)
-              room.tiles.add(map.get(x, y))
+              room.addTile(x, y, Tiles.floor)
             }
           } else {
             room.tiles.add(map.get(x, y))
@@ -132,11 +162,19 @@ class StaticRoomGenerator {
       }
 
       for (door in room.doors) {
+        /*
         if (map.get(door.x, door.y).type != Tiles.door.type) {
            map.set(door.x, door.y, Tiles.door)
         }
         room.tiles.add(map.get(door.x, door.y))
+        */
+        room.addTile(door.x, door.y, Tiles.door)
       }
+
+      for (feature in room.features) {
+
+      }
+
       room.setTileProperty("light", 2)
     }
 

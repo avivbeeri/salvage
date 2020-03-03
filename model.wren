@@ -36,6 +36,7 @@ class GameModel {
     _rooms = level.data
     _player = _entities.where {|entity| entity.type == "player" }.toList[0]
     _turn = 0
+    recalculate()
 
   }
   construct level(map, entities) {
@@ -44,6 +45,7 @@ class GameModel {
     _entities.each{|entity| entity.bindGame(this) }
     _player = _entities.where {|entity| entity.type == "player" }.toList[0]
     _turn = 0
+    recalculate()
   }
 
   nextTurn() {
@@ -90,29 +92,32 @@ class GameModel {
   }
 
   recalculate() {
-    var min = _player.pos - Vec.new(8, 8)
-    var max = _player.pos + Vec.new(8, 8)
-    for (y in min.y..max.y) {
-      for (x in min.x..max.x) {
-        var point = Vec.new(x, y)
-        getTileAt(point)["light"] = 0
-      }
-    }
-    for (y in min.y..max.y) {
-      for (x in min.x..max.x) {
-        var points = LineVisitor.walk(_player.pos, Vec.new(x, y))
+    var facing = Dir[_player.state["facing"]]
+    var min = _player.pos
+    var cone = facing * 10
+    var max = _player.pos + cone
+
+    recalculateRooms()
+
+    var base = _player.pos - facing
+    for (line in 0..cone.manhattan) {
+      for (scan in -line..line) {
+        var current = base + facing.perp * scan
+        var points = LineVisitor.walk(_player.pos, current)
         var visible = true
-        var last = null
-        for (index in 1...points.count) {
+        for (index in 0...points.count) {
           var tile = getTileAt(points[index])
-          tile["light"] = 2
-          if (visible && !tile["obscure"]) {
-            for (j in -1..1) {
-              for (i in -1..1) {
-                var point = points[index] + Vec.new(i, j)
-                var nextTile = getTileAt(point)
-                if (nextTile["obscure"]) {
-                  nextTile["light"] = 2
+          tile["seen"] = true
+          if (tile["light"] == null || tile["light"] < 2) {
+            tile["light"] = 2
+            if (visible && !tile["obscure"]) {
+              for (j in -1..1) {
+                for (i in -1..1) {
+                  var point = points[index] + Vec.new(i, j)
+                  var nextTile = getTileAt(point)
+                  if (nextTile["obscure"]) {
+                    nextTile["light"] = 2
+                  }
                 }
               }
             }
@@ -123,39 +128,40 @@ class GameModel {
           }
         }
       }
+      base = base + facing
     }
+
     for (entity in _entities) {
       if (entity != _player) {
-        var points = LineVisitor.walk(_player.pos, entity.pos)
-        var visible = true
-        for (index in 1...points.count) {
-          var tile = getTileAt(points[index])
-          if (tile["obscure"]) {
-            visible = false
-            break
-          }
-        }
-        entity.visible = visible
+        var tile = getTileAt(entity.pos)
+        entity.visible = tile["light"] == 2
       }
     }
+  }
 
-
+  getEntityRooms(entity) {
+    return _rooms.where {|room| room.isInRoom(entity.pos) }.toList
   }
 
   recalculateRooms() {
     var lighting = []
     _rooms.each {|room|
       var player = _player
-      if (room.isInRoom(player.pos)) {
+      if (room.isInRoom(player.pos) && room.light) {
         lighting.add(room)
       } else {
-        room.setTileProperty("light", 0)
+        room.setDarkness()
       }
     }
     entities.each {|entity|
-      entity.visible = lighting.count > 0 && lighting.any {|room| room.isInRoom(entity.pos) }
+      if (entity != _player) {
+        entity.visible = lighting.count > 0 && lighting.any {|room| room.isInRoom(entity.pos) }
+      }
     }
-    lighting.each {|room| room.setTileProperty("light", 2) }
+    lighting.each {|room|
+      room.setTileProperty("light", 2)
+      room.setTileProperty("seen", true)
+    }
   }
 
   getTileAt(vec) { getTileAt(vec.x, vec.y) }

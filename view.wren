@@ -40,7 +40,7 @@ class WaitAnimation is Animation {
   }
   update(view) {
     super.update(view)
-    if (t > 60) {
+    if (t > 20) {
       done = true
     }
   }
@@ -168,20 +168,34 @@ class GameView {
         if (tile["light"] > 0) {
         // if (!tile["dark"] && (Vec.new(x, y) - camera).length < border) {
           if (tile.type == ".") {
-            Canvas.print(".", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
+            if (tile["light"] == 2) {
+              Canvas.print(".", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
+            } else {
+              Canvas.print(".", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkblue)
+            }
           } else if (tile.type == "#") {
-            Canvas.print("#", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
-            // Canvas.rectfill(offX + x * 8, offY + y * 8, 7, 8, Color.darkgray)
+            if (tile["light"] == 2) {
+              Canvas.print("#", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
+            } else {
+              Canvas.print("#", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkblue)
+            }
           } else if (tile.type == "*") {
             Canvas.print("*", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.blue)
           } else if (tile.type == "~") {
-            Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, Color.brown)
-            Canvas.print("~", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT + 3, Color.white)
+            if (tile["light"] == 2) {
+              Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, Color.brown)
+              Canvas.print("~", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT + 3, Color.white)
+            } else {
+              Canvas.print("~", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT + 3, Color.darkblue)
+            }
           } else if (tile.type == "+") {
             // What kind of door is it?
             var color = Color.darkgreen
             if (tile["locked"]) {
               color = Color.hex("#800000")
+            }
+            if (tile["light"] < 2) {
+              color = Color.darkblue
             }
             Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, color)
             Canvas.print("+", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.black)

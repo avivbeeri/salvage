@@ -103,6 +103,9 @@ class Player is Actor {
     if (state["charge"]) {
       power = M.max(0, power - 1)
     }
+    if (game.getEntityRooms(this).all {|room| !room.light}) {
+      power = M.max(0, power - 1)
+    }
     super.finishTurn(action)
   }
 }
