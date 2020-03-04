@@ -1,6 +1,6 @@
 import "math" for M
 import "./dir" for Dir
-import "./events" for BoltEvent, EnergyDepletedEvent, MoveEvent, LogEvent
+import "./events" for MoveEvent, LogEvent, GameOverEvent
 import "./tiles" for Tiles
 
 class Action {
@@ -194,4 +194,15 @@ class FireWeaponAction is Action {
       return false
     }
   }
+}
+
+class InteractWithMenuAction is Action {
+  construct new(pos) {
+    super("interact-menu")
+  }
+
+  perform(result) {
+
+  }
+
 }

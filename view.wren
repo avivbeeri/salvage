@@ -11,6 +11,9 @@ import "./action" for PlayerMoveAction,
 import "./events" for GameOverEvent, MoveEvent, LogEvent
 import "./model" for GameModel
 import "./keys" for Key
+import "./actor" for FULL_POWER
+
+var MAROON = Color.hex("#800000")
 
 
 var TILE_WIDTH = 8
@@ -58,7 +61,7 @@ class MessageAnimation is Animation {
     Canvas.rectfill(0, centerH - _height + 1, Canvas.width, 2, Color.black)
     Canvas.rectfill(0, centerH + _height - 3, Canvas.width, 2, Color.black)
     // Canvas.line(0, centerH + _height - 1, Canvas.width,  centerH + _height - 1, Color.black)
-    if (_height > 5) {
+    if (_height > 2) {
       Canvas.print(_message, centerW - _message.count * TILE_WIDTH / 2, centerH - 4, Color.black)
     }
   }
@@ -79,8 +82,9 @@ class GameWinAnimation is MessageAnimation {
   update(view) {
     super.update(view)
     if (done) {
+
       var level = StaticRoomGenerator.generate([])
-      var view = GameView.init(GameModel.level(level))
+      view.model = GameModel.level(level)
       return view
     }
   }
@@ -92,9 +96,8 @@ class GameLoseAnimation is MessageAnimation {
   update(view) {
     super.update(view)
     if (done) {
-      System.print("RELOAD")
       var level = StaticRoomGenerator.generate([])
-      var view = GameView.init(GameModel.level(level))
+      view.model = GameModel.level(level)
       return view
     }
   }
@@ -134,7 +137,7 @@ class GameView {
   construct init(gameModel) {
     Window.title = "Salvage"
     var scale = 3
-    Canvas.resize(128+64, 128 + 64)
+    Canvas.resize(128+70, 128 + 64)
     Window.resize(scale * Canvas.width, scale * Canvas.height)
 
     _model = gameModel
@@ -148,6 +151,7 @@ class GameView {
   }
   camera { _camera }
   model { _model }
+  model=(v) { _model = v }
 
   update() {
     _ready = _animations.count == 0
@@ -297,7 +301,7 @@ class GameView {
 
 
     Canvas.rectfill(129, top, 64, Canvas.height, Color.black)
-    Canvas.line(129, top, 129, Canvas.height, Color.purple)
+    Canvas.line(129, top, 129, Canvas.height, Color.darkgray)
     var lineY = 0
     for (line in _log) {
       Canvas.print(line, 0, lineY, Color.white)
@@ -305,11 +309,29 @@ class GameView {
     }
 
     Canvas.print("[", 0, top + 128, Color.white)
-    for (pip in 0...(player.power / 40).ceil) {
-      Canvas.print("|", 3 * (1 + pip), top + 128, Color.blue)
+    var color = Color.blue
+    if ((player.power / FULL_POWER) <= 0.1) {
+      color = Color.orange
     }
-    Canvas.print("]", 8 + 3 * 38, top + 128, Color.white)
-    Canvas.print(player.power.toString, 0, top + 136, Color.white)
+    if ((player.power / FULL_POWER) <=0.05) {
+      color = Color.red
+    }
+    for (pip in 0...(player.power / 55).ceil) {
+      Canvas.print("|", 3 * (1 + pip), top + 128, color)
+    }
+    var percentage = (100 * player.power / FULL_POWER).floor
+    var percentX = 8 + 3 * 30
+    if (percentage < 100) {
+      percentX = percentX + 8
+    }
+    Canvas.print("]", 5 + 3 * 29, top + 128, Color.white)
+    Canvas.print("%(percentage)\%", percentX, top + 128, Color.white)
+
+    if (_model["currentRooms"].all {|room| !room.light }) {
+      var uiTop = top
+      Canvas.rectfill(130, uiTop, 70, 12, Color.red)
+      Canvas.print("Darkness", 133, uiTop + 2, Color.black)
+    }
 
     // Render one animation at a time
     if (_animations.count > 0) {

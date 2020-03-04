@@ -25,9 +25,10 @@ class GameModel {
   map { _map }
   player { _player }
   entities { _entities }
-  energy { _entities[_turn].energy }
   turn { _turn }
   isPlayerTurn() { _entities[_turn] == _player }
+  state { _data }
+  [index] { _data[index] }
 
   construct level(level) {
     _map = level.map
@@ -36,16 +37,9 @@ class GameModel {
     _rooms = level.data
     _player = _entities.where {|entity| entity.type == "player" }.toList[0]
     _turn = 0
+    _data = {}
     recalculate()
 
-  }
-  construct level(map, entities) {
-    _map = map
-    _entities = entities
-    _entities.each{|entity| entity.bindGame(this) }
-    _player = _entities.where {|entity| entity.type == "player" }.toList[0]
-    _turn = 0
-    recalculate()
   }
 
   nextTurn() {
@@ -81,7 +75,7 @@ class GameModel {
       _result.progress = action.perform(_result)
     }
 
-    // Some actions should consume energy on failure
+    // Some actions may consume energy on failure?
     if (_result.progress) {
       actor.finishTurn(action)
       recalculate()
@@ -145,8 +139,12 @@ class GameModel {
 
   recalculateRooms() {
     var lighting = []
+    state["currentRooms"] = []
     _rooms.each {|room|
       var player = _player
+      if (room.isInRoom(player.pos)) {
+        state["currentRooms"].add(room)
+      }
       if (room.isInRoom(player.pos) && room.light) {
         lighting.add(room)
       } else {
