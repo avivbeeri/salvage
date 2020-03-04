@@ -45,7 +45,7 @@ class TitleMenu {
     return null
   }
   draw() {
-    var left = 15
+    var left = Canvas.width / 2 - 8 * 10
     var top = 10
     Canvas.print("Press space to begin", left, top, Color.white)
     Canvas.print("    the mission", left, top + 8, Color.white)

@@ -75,7 +75,7 @@ class Player is Actor {
     super("player", x, y)
       visible = true
       _action = null
-      _power = (FULL_POWER * 0.01).floor // FULL_POWER
+      _power = (FULL_POWER * 1.00).floor // FULL_POWER
     state = {
       "facing": "up"
     }

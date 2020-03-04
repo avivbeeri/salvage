@@ -12,10 +12,6 @@ import "./events" for GameOverEvent, MoveEvent, LogEvent
 import "./model" for GameModel
 import "./keys" for Key
 import "./actor" for FULL_POWER
-
-var MAROON = Color.hex("#800000")
-
-
 var TILE_WIDTH = 8
 var TILE_HEIGHT = 8
 
@@ -210,14 +206,15 @@ class GameView {
     var player = _model.player
 
 
-    var displayW = 128
-    var displayH = 128
-    var top = (Canvas.height - displayH) / 2
-    var left = 4
-    var offX = left + (displayW / 2) - (camera.x * TILE_WIDTH) - 4
-    var offY = top + (displayH / 2) - (camera.y * TILE_HEIGHT) - 4
+    // Border is number of tiles
+    var border = 9
+    var displayW = (2 * border + 1) * TILE_WIDTH
+    var displayH = (2 * border + 1) * TILE_HEIGHT
+    var top = 0 // (Canvas.height - displayH) / 2
+    var left = 0
+    var offX = left + (displayW / 2) - (camera.x * TILE_WIDTH)
+    var offY = top + (displayH / 2) - (camera.y * TILE_HEIGHT)
 
-    var border = 8
     var minX = M.max(player.x - border, 0)
     var maxX = M.min(player.x + border, map.width)
     var minY = M.max(player.y - border, 0)
@@ -291,12 +288,14 @@ class GameView {
         }
       }
     }
-    Canvas.rectfill(left, top - 12, displayW, TILE_HEIGHT, Color.black)
-    drawLog(0, 0)
+    // Canvas.rectfill(left, top - 12, displayW, TILE_HEIGHT, Color.black)
+    Canvas.rect(left, top, displayW+1, displayH, Color.darkgray)
+
+    drawLog(0, displayH + 8 + 4)
     drawPowerBar(0, top + displayH)
-    Canvas.line(displayW + 3, top, displayW + 3, Canvas.height, Color.darkgray)
+    Canvas.line(displayW, top, displayW, Canvas.height, Color.darkgray)
     if (!_gameOver) {
-      drawUI(displayW + 3, top)
+      drawSidebar(displayW, top)
     }
 
     // Render one animation at a time
@@ -305,13 +304,17 @@ class GameView {
     }
   }
   drawLog(left, top) {
-    Canvas.rectfill(129, top, 64, Canvas.height, Color.black)
-    var lineY = 0
-    for (line in _log) {
-      Canvas.print(line, 0, lineY, Color.white)
+    // Canvas.rectfill(left, top, 64, Canvas.height, Color.black)
+    var lineY = top
+    for (logIndex in 0..._log.count)  {
+      var line = _log[logIndex]
+      var color = Color.darkgray
+      if (logIndex == _log.count - 1) {
+        color = Color.white
+      }
+      Canvas.print(line, left, lineY, color)
       lineY = lineY + 8
     }
-
   }
 
   drawPowerBar(left, top) {
@@ -336,15 +339,19 @@ class GameView {
     Canvas.print("%(percentage)\%", percentX, top, Color.white)
   }
 
-  drawUI(left, top) {
+  drawSidebar(left, top) {
 
-    var uiTop = top
+    var uiTop = top + 4
+    var width = Canvas.width - left
+    var textCenter = left + (width - 8 * 8) / 2
+    Canvas.rectfill(left, top, width, Canvas.height, Color.darkgray )
     if (_model["currentRooms"].all {|room| !room.light }) {
-      Canvas.rectfill(left+1, uiTop, 70, 12, Color.red)
-      Canvas.print("Darkness", left + 4, uiTop + 2, Color.black)
+      Canvas.rectfill(left, uiTop, width, 12, Color.red)
+      Canvas.print("Darkness", textCenter, uiTop + 2, Color.black)
     } else {
-      Canvas.rect(left+1, uiTop, 71, 12, Color.darkgray)
-      Canvas.print("Darkness", left+4, uiTop + 2, Color.darkgray)
+      Canvas.rectfill(left, uiTop, width, 12, Color.black)
+      Canvas.print("Darkness", textCenter, uiTop + 2, Color.darkgray)
+      Canvas.line(left, uiTop, left, uiTop + 12, Color.darkgray)
     }
 
   }

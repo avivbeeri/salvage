@@ -106,19 +106,19 @@ class GameModel {
       for (scan in -line..line) {
         var current = base + facing.perp * scan
         var points = LineVisitor.walk(_player.pos, current)
-        var visible = true
         for (index in 0...points.count) {
           var tile = getTileAt(points[index])
           tile["seen"] = true
           if (tile["light"] == null || tile["light"] < 2) {
             tile["light"] = 2
-            if (visible && !tile["obscure"]) {
+            if (!tile["obscure"]) {
               for (j in -1..1) {
                 for (i in -1..1) {
                   var point = points[index] + Vec.new(i, j)
                   var nextTile = getTileAt(point)
                   if (nextTile["obscure"]) {
                     nextTile["light"] = 2
+                    nextTile["seen"] = true
                   }
                 }
               }
