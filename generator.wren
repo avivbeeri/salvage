@@ -187,7 +187,7 @@ class StaticRoomGenerator {
       room.setTileProperty("light", 2)
     }
 
-    map.set(3, 2, Tiles.teleport)
+    map.set(3, 2, Tiles.console)
     map.set(14, 4, Tiles.sludge)
     rooms.each {|room|
       if (room.isInRoom(14, 4)) {

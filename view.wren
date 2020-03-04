@@ -8,7 +8,7 @@ import "./action" for PlayerMoveAction,
   RestAction,
   ChargeWeaponAction,
   FireWeaponAction
-import "./events" for GameOverEvent, MoveEvent, LogEvent
+import "./events" for GameOverEvent, MoveEvent, LogEvent, MenuEvent
 import "./model" for GameModel
 import "./keys" for Key
 import "./actor" for FULL_POWER
@@ -192,6 +192,8 @@ class GameView {
       } else if (event is LogEvent) {
         _log.add(event.text)
         _log = _log.skip(M.max(0, _log.count - 3)).toList
+      } else if (event is MenuEvent) {
+        System.print(event.menu)
       } else if (event is MoveEvent) {
         if (event.source == _model.player) {
           return CameraAnimation.begin()
@@ -229,24 +231,24 @@ class GameView {
         // if (!tile["dark"] && (Vec.new(x, y) - camera).length < border) {
           if (tile.type == ".") {
             if (tile["light"] == 2) {
-              Canvas.print(".", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
+              Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
             } else {
-              Canvas.print(".", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkblue)
+              Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkblue)
             }
           } else if (tile.type == "#") {
             if (tile["light"] == 2) {
-              Canvas.print("#", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
+              Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
             } else {
-              Canvas.print("#", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkblue)
+              Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkblue)
             }
           } else if (tile.type == "*") {
-            Canvas.print("*", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.blue)
+            Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.blue)
           } else if (tile.type == "~") {
             if (tile["light"] == 2) {
               Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, Color.brown)
-              Canvas.print("~", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT + 3, Color.white)
+              Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT + 3, Color.white)
             } else {
-              Canvas.print("~", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT + 3, Color.darkblue)
+              Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT + 3, Color.darkblue)
             }
           } else if (tile.type == "+") {
             // What kind of door is it?
@@ -258,7 +260,7 @@ class GameView {
               color = Color.darkblue
             }
             Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, color)
-            Canvas.print("+", offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.black)
+            Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.black)
           }
         }
       }
@@ -283,9 +285,9 @@ class GameView {
       } else if (entity.type == "chargeball") {
         if (entity.state == "charging") {
           var diff = entity.pos - player.pos
-          Canvas.print("o", offX + TILE_WIDTH * (camera.x + diff.x), offY + TILE_HEIGHT * (camera.y +  diff.y), Color.blue)
+          Canvas.print("*", offX + TILE_WIDTH * (camera.x + diff.x), offY + TILE_HEIGHT * (camera.y +  diff.y), Color.blue)
         } else {
-          Canvas.print("o", offX + TILE_WIDTH * (entity.x), offY + TILE_HEIGHT * (entity.y), Color.blue)
+          Canvas.print("*", offX + TILE_WIDTH * (entity.x), offY + TILE_HEIGHT * (entity.y), Color.blue)
         }
       }
     }

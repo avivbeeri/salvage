@@ -32,3 +32,11 @@ class BoltEvent is Event {
     _target = [tx, ty]
   }
 }
+
+class MenuEvent is Event {
+  construct new(menu) {
+    _menu = menu
+  }
+
+  menu { _menu }
+}

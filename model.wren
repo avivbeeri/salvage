@@ -96,7 +96,8 @@ class GameModel {
   recalculate() {
     var facing = Dir[_player.state["facing"]]
     var min = _player.pos
-    var cone = facing * 10
+    var length = 7
+    var cone = facing * length
     var max = _player.pos + cone
 
     recalculateRooms()
@@ -141,8 +142,12 @@ class GameModel {
     }
   }
 
+  getRoomsAtPos(pos) {
+    return _rooms.where {|room| room.isInRoom(pos) }.toList
+  }
+
   getEntityRooms(entity) {
-    return _rooms.where {|room| room.isInRoom(entity.pos) }.toList
+    return getRoomsAtPos(entity.pos)
   }
 
   recalculateRooms() {
@@ -172,6 +177,11 @@ class GameModel {
   getTileAt(vec) { getTileAt(vec.x, vec.y) }
   getTileAt(x, y) {
     return _map.get(x, y)
+  }
+
+  setTileAt(pos, tile) { setTileAt(pos.x, pos.y, tile) }
+  setTileAt(x, y, tile) {
+    _map.set(x, y, tile.copy)
   }
 
   isTileSolid(x, y) {

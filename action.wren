@@ -1,7 +1,6 @@
-import "math" for M
+import "math" for M, Vec
 import "./dir" for Dir
-import "./events" for MoveEvent, LogEvent, GameOverEvent
-import "./tiles" for Tiles
+import "./events" for MoveEvent, LogEvent, GameOverEvent, MenuEvent
 
 class Action {
   type { _type }
@@ -112,13 +111,16 @@ class MoveAction is Action {
     var isSolid = tile["solid"]
     var isOccupied = game.getEntitiesOnTile(destX, destY).where {|entity| entity.solid }.count > 0
 
+    var isInteractable = tile["menu"] != null
+    if (isInteractable) {
+      result.alternate = InteractWithMenuAction.new(Vec.new(destX, destY))
+      return true
+    }
+
     if (!isSolid && !isOccupied) {
       actor.x = destX
       actor.y = destY
       validMove = true
-      if (tile["teleport"]) {
-        result.alternate = TeleportAction.new()
-      }
     }
     return validMove
   }
@@ -131,6 +133,10 @@ class PlayerMoveAction is MoveAction {
   perform(result) {
     var validMove = super.perform(result)
     if (validMove) {
+      var tile = game.getTileAt(actor.pos)
+      if (tile["teleport"]) {
+        result.alternate = TeleportAction.new()
+      }
       if (actor.state["charge"]) {
 
         var charge = actor.state["charge"]
@@ -170,6 +176,7 @@ class ChargeMoveAction is MoveAction {
         actor.state = "hit"
       }
     } else {
+      import "./tiles" for Tiles
       var tile = game.getTileAt(actor.pos)
       if (tile["obscure"]) {
         game.destroyEntity(actor)
@@ -208,10 +215,27 @@ class FireWeaponAction is Action {
 class InteractWithMenuAction is Action {
   construct new(pos) {
     super("interact-menu")
+    _pos = pos
   }
 
   perform(result) {
+    var tile = game.getTileAt(_pos)
+    if (tile["menu"] != null) {
+      game.addEventToResult(MenuEvent.new(tile["menu"]))
+      return false
+    }
 
+    return false
   }
 
+}
+
+class SelfDestructAction is Action {
+  construct new() {
+    super("self-destruct")
+  }
+  perform(result) {
+    game["self-destruct"] = true
+    game.addEventToResult(LogEvent.new("Self-destruct set"))
+  }
 }
