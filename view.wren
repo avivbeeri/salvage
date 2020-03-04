@@ -40,7 +40,7 @@ class WaitAnimation is Animation {
   }
   update(view) {
     super.update(view)
-    if (t > 20) {
+    if (t > 10) {
       done = true
     }
   }
