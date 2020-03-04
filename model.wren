@@ -1,6 +1,6 @@
 import "./dir" for Dir
 import "./action" for MoveAction
-import "./events" for BoltEvent, EnergyDepletedEvent
+import "./events" for LogEvent, GameOverEvent
 import "./actor" for Player
 import "./line" for LineVisitor
 import "math" for Vec
@@ -79,10 +79,18 @@ class GameModel {
     if (_result.progress) {
       actor.finishTurn(action)
       recalculate()
+      checkConditions()
       nextTurn()
     }
 
     return _result
+  }
+
+  checkConditions() {
+    if (_player.power <= 0) {
+      addEventToResult(LogEvent.new("Out of power"))
+      addEventToResult(GameOverEvent.new())
+    }
   }
 
   recalculate() {

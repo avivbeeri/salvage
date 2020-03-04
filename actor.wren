@@ -75,7 +75,7 @@ class Player is Actor {
     super("player", x, y)
       visible = true
       _action = null
-      _power = (FULL_POWER * 1.00).floor // FULL_POWER
+      _power = (FULL_POWER * 0.01).floor // FULL_POWER
     state = {
       "facing": "up"
     }
@@ -107,11 +107,6 @@ class Player is Actor {
       power = M.max(0, power - 1)
     }
     super.finishTurn(action)
-
-    if (power <= 0) {
-      game.addEventToResult(LogEvent.new("Out of power"))
-      game.addEventToResult(GameOverEvent.new())
-    }
   }
 }
 

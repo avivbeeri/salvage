@@ -135,19 +135,24 @@ class CameraAnimation is Animation {
 
 class GameView {
   construct init(gameModel) {
-
     _model = gameModel
+    init()
+  }
+  init() {
     _log = []
     _events = []
     _animations = [ WaitAnimation.begin(), GameBeginAnimation.begin() ]
     _ready = true
-    updateState()
-
     _camera = Vec.new(_model.player.x, _model.player.y)
+    updateState()
   }
+
   camera { _camera }
   model { _model }
-  model=(v) { _model = v }
+  model=(v) {
+    _model = v
+    init()
+  }
 
   update() {
     _ready = _animations.count == 0
@@ -202,13 +207,6 @@ class GameView {
   draw() {
     Canvas.cls()
     var map = _currentMap
-    if (_gameOver) {
-      // TODO UI Stacking system
-      Canvas.print("Game Over", 0, map.height * 8, Color.white)
-    } else {
-      // Canvas.print("Player: %(_model.entities[0].energy)", 0,8, Color.white)
-      // Canvas.print("Blob: %(_model.entities[1].energy)", 0, 0, Color.white)
-    }
     var player = _model.player
 
 
@@ -296,7 +294,15 @@ class GameView {
     Canvas.rectfill(left, top - 12, displayW, TILE_HEIGHT, Color.black)
     drawLog(0, 0)
     drawPowerBar(0, top + displayH)
-    drawUI(displayW + 3, top)
+    Canvas.line(displayW + 3, top, displayW + 3, Canvas.height, Color.darkgray)
+    if (!_gameOver) {
+      drawUI(displayW + 3, top)
+    }
+
+    // Render one animation at a time
+    if (_animations.count > 0) {
+      _animations[0].draw()
+    }
   }
   drawLog(left, top) {
     Canvas.rectfill(129, top, 64, Canvas.height, Color.black)
@@ -321,7 +327,7 @@ class GameView {
     for (pip in 0...(player.power / 55).ceil) {
       Canvas.print("|", 3 * (1 + pip), top, color)
     }
-    var percentage = (100 * player.power / FULL_POWER).floor
+    var percentage = (100 * player.power / FULL_POWER).ceil
     var percentX = 8 + 3 * 30
     if (percentage < 100) {
       percentX = percentX + 8
@@ -331,20 +337,14 @@ class GameView {
   }
 
   drawUI(left, top) {
-    Canvas.line(left, top, left, Canvas.height, Color.darkgray)
 
     var uiTop = top
     if (_model["currentRooms"].all {|room| !room.light }) {
-      Canvas.rectfill(130, uiTop, 70, 12, Color.red)
-      Canvas.print("Darkness", 133, uiTop + 2, Color.black)
+      Canvas.rectfill(left+1, uiTop, 70, 12, Color.red)
+      Canvas.print("Darkness", left + 4, uiTop + 2, Color.black)
     } else {
-      Canvas.rect(129, uiTop, 71, 12, Color.darkgray)
-      Canvas.print("Darkness", 133, uiTop + 2, Color.darkgray)
-    }
-
-    // Render one animation at a time
-    if (_animations.count > 0) {
-      _animations[0].draw()
+      Canvas.rect(left+1, uiTop, 71, 12, Color.darkgray)
+      Canvas.print("Darkness", left+4, uiTop + 2, Color.darkgray)
     }
 
   }
