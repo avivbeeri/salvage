@@ -347,13 +347,16 @@ class GameView {
     var textCenter = left + (width - 8 * 8) / 2
     Canvas.rectfill(left, top, width, Canvas.height, Color.darkgray )
     if (_model["currentRooms"].all {|room| !room.light }) {
-      Canvas.rectfill(left, uiTop, width, 12, Color.red)
+      Canvas.rectfill(left + 2, uiTop, width - 4, 12, Color.red)
       Canvas.print("Darkness", textCenter, uiTop + 2, Color.black)
     } else {
       Canvas.rectfill(left, uiTop, width, 12, Color.black)
       Canvas.print("Darkness", textCenter, uiTop + 2, Color.darkgray)
-      Canvas.line(left, uiTop, left, uiTop + 12, Color.darkgray)
+      Canvas.rectfill(left, uiTop, 2, 12, Color.darkgray)
+      Canvas.rectfill(Canvas.width - 2, uiTop, 2, 12, Color.darkgray)
     }
+    uiTop = uiTop + 12 + 4
+    Canvas.rectfill(left + 2, uiTop, width - 4, (Canvas.height - uiTop - 2), Color.black)
 
   }
 
