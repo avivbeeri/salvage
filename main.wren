@@ -1,3 +1,4 @@
+import "dome" for Window
 import "graphics" for Canvas, Color
 import "dome" for Process
 import "input" for Keyboard
@@ -9,7 +10,10 @@ class Game {
   static init() {
     // var level = StaticRoomGenerator.generate([])
     // __view = GameView.init(GameModel.level(level))
-    Canvas.resize(128+64, 128 + 64)
+    var scale = 3
+    Canvas.resize(256, 192)
+    Window.resize(scale * Canvas.width, scale * Canvas.height)
+    Window.title = "Salvage"
     __view = TitleMenu.init()
   }
 

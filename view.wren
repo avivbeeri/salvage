@@ -135,10 +135,6 @@ class CameraAnimation is Animation {
 
 class GameView {
   construct init(gameModel) {
-    Window.title = "Salvage"
-    var scale = 3
-    Canvas.resize(128+70, 128 + 64)
-    Window.resize(scale * Canvas.width, scale * Canvas.height)
 
     _model = gameModel
     _log = []
@@ -298,17 +294,23 @@ class GameView {
       }
     }
     Canvas.rectfill(left, top - 12, displayW, TILE_HEIGHT, Color.black)
-
-
+    drawLog(0, 0)
+    drawPowerBar(0, top + displayH)
+    drawUI(displayW + 3, top)
+  }
+  drawLog(left, top) {
     Canvas.rectfill(129, top, 64, Canvas.height, Color.black)
-    Canvas.line(129, top, 129, Canvas.height, Color.darkgray)
     var lineY = 0
     for (line in _log) {
       Canvas.print(line, 0, lineY, Color.white)
       lineY = lineY + 8
     }
 
-    Canvas.print("[", 0, top + 128, Color.white)
+  }
+
+  drawPowerBar(left, top) {
+    var player = _model.player
+    Canvas.print("[", 0, top, Color.white)
     var color = Color.blue
     if ((player.power / FULL_POWER) <= 0.1) {
       color = Color.orange
@@ -317,26 +319,34 @@ class GameView {
       color = Color.red
     }
     for (pip in 0...(player.power / 55).ceil) {
-      Canvas.print("|", 3 * (1 + pip), top + 128, color)
+      Canvas.print("|", 3 * (1 + pip), top, color)
     }
     var percentage = (100 * player.power / FULL_POWER).floor
     var percentX = 8 + 3 * 30
     if (percentage < 100) {
       percentX = percentX + 8
     }
-    Canvas.print("]", 5 + 3 * 29, top + 128, Color.white)
-    Canvas.print("%(percentage)\%", percentX, top + 128, Color.white)
+    Canvas.print("]", 5 + 3 * 29, top, Color.white)
+    Canvas.print("%(percentage)\%", percentX, top, Color.white)
+  }
 
+  drawUI(left, top) {
+    Canvas.line(left, top, left, Canvas.height, Color.darkgray)
+
+    var uiTop = top
     if (_model["currentRooms"].all {|room| !room.light }) {
-      var uiTop = top
       Canvas.rectfill(130, uiTop, 70, 12, Color.red)
       Canvas.print("Darkness", 133, uiTop + 2, Color.black)
+    } else {
+      Canvas.rect(129, uiTop, 71, 12, Color.darkgray)
+      Canvas.print("Darkness", 133, uiTop + 2, Color.darkgray)
     }
 
     // Render one animation at a time
     if (_animations.count > 0) {
       _animations[0].draw()
     }
+
   }
 
 }
