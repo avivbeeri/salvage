@@ -139,6 +139,7 @@ class GameView {
     _events = []
     _animations = [ WaitAnimation.begin(), GameBeginAnimation.begin() ]
     _ready = true
+    _gameOver = false
     _camera = Vec.new(_model.player.x, _model.player.y)
     updateState()
   }
@@ -305,15 +306,15 @@ class GameView {
   }
   drawLog(left, top) {
     // Canvas.rectfill(left, top, 64, Canvas.height, Color.black)
-    var lineY = top
+    var baseline = top + 8 * 2
     for (logIndex in 0..._log.count)  {
+      var lineY = baseline + (logIndex - 2) * 8
       var line = _log[logIndex]
       var color = Color.darkgray
       if (logIndex == _log.count - 1) {
         color = Color.white
       }
       Canvas.print(line, left, lineY, color)
-      lineY = lineY + 8
     }
   }
 
