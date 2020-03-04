@@ -159,11 +159,11 @@ class ChargeMoveAction is MoveAction {
   }
   perform(result) {
     var validMove = super.perform(result)
+    var target = actor.pos + Dir[direction]
     if (!validMove) {
       if (actor.state == "charging") {
         game.destroyEntity(actor)
       } else {
-        var target = actor.pos + Dir[direction]
         game.getEntitiesOnTile(target.x, target.y).each {|entity| game.destroyEntity(entity) }
         actor.pos.x = target.x
         actor.pos.y = target.y
@@ -173,7 +173,16 @@ class ChargeMoveAction is MoveAction {
       var tile = game.getTileAt(actor.pos)
       if (tile["obscure"]) {
         game.destroyEntity(actor)
-        validMove = false
+        target = actor.pos
+        var tile = game.getTileAt(target)
+        if (tile.type == Tiles.door.type) {
+          tile["hp"] = tile["hp"] - 1
+          if (tile["hp"] <= 0) {
+            var newTile = Tiles.floor.copy
+            var rooms = game.getRoomsAtPos(target)
+            rooms.each {|room| room.addTile(target.x, target.y, newTile)}
+          }
+        }
       }
     }
     return validMove
