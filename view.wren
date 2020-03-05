@@ -8,12 +8,22 @@ import "./action" for PlayerMoveAction,
   RestAction,
   ChargeWeaponAction,
   FireWeaponAction
-import "./events" for GameOverEvent, MoveEvent, LogEvent, MenuEvent
 import "./model" for GameModel
 import "./keys" for Key
+import "./tiles" for Tiles
 import "./actor" for FULL_POWER
+import "./events" for
+  GameOverEvent,
+  MoveEvent,
+  LogEvent,
+  SelfDestructEvent,
+  MenuEvent
+
+
+var BORDER = 9
 var TILE_WIDTH = 8
 var TILE_HEIGHT = 8
+var MAROON = Color.rgb(128, 0, 0)
 
 var Inputs = [
   "left",
@@ -36,6 +46,27 @@ class Animation {
   draw() {}
 }
 
+class FlashAnimation is Animation {
+  construct begin() {
+    _cycle = 30
+    _length = 60 * 3
+    _color = Color.rgb(255, 0, 0, 128)
+  }
+
+  update(view) {
+    super.update(view)
+    done = t >= _length
+    System.print(done)
+  }
+
+  draw() {
+    if (t % 60 < _cycle) {
+      Canvas.rectfill(0, 0, (1 + 2 * BORDER) * TILE_WIDTH, (1 + 2 * BORDER) * TILE_HEIGHT, _color)
+    }
+  }
+
+}
+
 class MenuEffect is Animation {
   construct begin(items) {
     _items = items
@@ -49,7 +80,7 @@ class MenuEffect is Animation {
   }
   update(view) {
     super.update(view)
-    SPACE_KEY.update()
+    // SPACE_KEY.update()
     _keys.each {|key|
       key.update()
       if (key.firing) {
@@ -238,11 +269,13 @@ class GameView {
         _gameOver = true
         return  [ GameLoseAnimation.begin() ]
       } else if (event is LogEvent) {
-        _log.add(event.text)
+        _log.add([ event.priority, event.text ])
         _log = _log.skip(M.max(0, _log.count - 3)).toList
       } else if (event is MenuEvent) {
         System.print(event.menu)
         return [ WaitAnimation.begin(8), MenuEffect.begin(event.menu) ]
+      } else if (event is SelfDestructEvent) {
+        return [ FlashAnimation.begin() ]
       } else if (event is MoveEvent) {
         if (event.source == _model.player) {
           return [ CameraAnimation.begin() ]
@@ -259,7 +292,7 @@ class GameView {
 
 
     // Border is number of tiles
-    var border = 9
+    var border = BORDER
     var displayW = (2 * border + 1) * TILE_WIDTH
     var displayH = (2 * border + 1) * TILE_HEIGHT
     var top = 0 // (Canvas.height - displayH) / 2
@@ -278,28 +311,28 @@ class GameView {
         var tile = map.get(x, y)
         if (tile["light"] != null && tile["light"] > 0) {
         // if (!tile["dark"] && (Vec.new(x, y) - camera).length < border) {
-          if (tile.type == ".") {
+          if (tile.type == Tiles.floor.type) {
             if (tile["light"] == 2) {
               Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
             } else {
               Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkblue)
             }
-          } else if (tile.type == "#") {
+          } else if (tile.type == Tiles.wall.type) {
             if (tile["light"] == 2) {
               Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkgray)
             } else {
               Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.darkblue)
             }
-          } else if (tile.type == "*") {
+          } else if (tile.type == Tiles.console.type) {
             Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.blue)
-          } else if (tile.type == "~") {
+          } else if (tile.type == Tiles.sludge.type) {
             if (tile["light"] == 2) {
               Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, Color.brown)
               Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT + 3, Color.white)
             } else {
               Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT + 3, Color.darkblue)
             }
-          } else if (tile.type == "+") {
+          } else if (tile.type == Tiles.door.type) {
             // What kind of door is it?
             var color = Color.darkgreen
             if (tile["locked"]) {
@@ -360,10 +393,11 @@ class GameView {
     var baseline = top + 8 * 2
     for (logIndex in 0..._log.count)  {
       var lineY = baseline + (logIndex - 2) * 8
-      var line = _log[logIndex]
-      var color = Color.darkgray
+      var line = _log[logIndex][1]
+      var priority = _log[logIndex][0]
+      var color = priority == "high" ? MAROON : Color.darkgray
       if (logIndex == _log.count - 1) {
-        color = Color.white
+        color = priority == "high" ? Color.red : Color.white
       }
       Canvas.print(line, left, lineY, color)
     }
@@ -408,6 +442,9 @@ class GameView {
     }
     uiTop = uiTop + 12 + 4
     Canvas.rectfill(left + 2, uiTop, width - 4, (Canvas.height - uiTop - 2), Color.black)
+    if (_model["self-destruct"] != null) {
+      Canvas.print("%(_model["self-destruct"]) turns", Canvas.width - 10 * TILE_WIDTH, Canvas.height - 10, Color.red)
+    }
 
   }
 

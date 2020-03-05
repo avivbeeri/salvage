@@ -20,8 +20,15 @@ class EnergyDepletedEvent is Event {
 class LogEvent is Event {
   construct new(text) {
     _text = text
+    _priorty = "low"
+  }
+
+  construct new(text, priority) {
+    _text = text
+    _priority = priority
   }
   text { _text }
+  priority { _priority }
 }
 
 class BoltEvent is Event {
@@ -39,4 +46,8 @@ class MenuEvent is Event {
   }
 
   menu { _menu }
+}
+
+class SelfDestructEvent is Event {
+  construct new() {}
 }

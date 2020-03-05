@@ -1,6 +1,11 @@
 import "math" for M, Vec
 import "./dir" for Dir
-import "./events" for MoveEvent, LogEvent, GameOverEvent, MenuEvent
+import "./events" for
+  MoveEvent,
+  LogEvent,
+  GameOverEvent,
+  SelfDestructEvent,
+  MenuEvent
 
 class Action {
   type { _type }
@@ -235,7 +240,8 @@ class SelfDestructAction is Action {
     super("self-destruct")
   }
   perform(result) {
-    game["self-destruct"] = true
-    game.addEventToResult(LogEvent.new("Self-destruct set"))
+    game["self-destruct"] = 5
+    game.addEventToResult(LogEvent.new("Self-destruct set", "high"))
+    game.addEventToResult(SelfDestructEvent.new())
   }
 }

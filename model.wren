@@ -92,6 +92,16 @@ class GameModel {
       addEventToResult(LogEvent.new("Out of power"))
       addEventToResult(GameOverEvent.new())
     }
+
+    if (currentActor == _player) {
+      if (_data["self-destruct"] != null) {
+        _data["self-destruct"] = _data["self-destruct"] - 1
+        if (_data["self-destruct"] <= 0) {
+          addEventToResult(LogEvent.new("Station Exploded."))
+          addEventToResult(GameOverEvent.new())
+        }
+      }
+    }
   }
 
   recalculate() {
