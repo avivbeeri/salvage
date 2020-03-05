@@ -29,6 +29,7 @@ class GameModel {
   isPlayerTurn() { _entities[_turn] == _player }
   state { _data }
   [index] { _data[index] }
+  [index]=(v) { _data[index] = v }
 
   construct level(level) {
     _map = level.map

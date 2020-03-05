@@ -36,6 +36,50 @@ class Animation {
   draw() {}
 }
 
+class MenuEffect is Animation {
+  construct begin(items) {
+    _items = items
+    _position = 0
+    _upKey = Key.new("up", -1, true)
+    _downKey = Key.new("down", 1, true)
+    _keys = [
+      _upKey,
+      _downKey
+    ]
+  }
+  update(view) {
+    super.update(view)
+    SPACE_KEY.update()
+    _keys.each {|key|
+      key.update()
+      if (key.firing) {
+        _position = _position + key.action
+      }
+    }
+    _position = M.abs(_position % (_items.count))
+    if (SPACE_KEY.firing) {
+      done = true
+      view.model.player.action = _items[_position][1]
+    }
+  }
+
+  draw() {
+    var width = Canvas.width / 2
+    var height = Canvas.height / 2
+    Canvas.rect(Canvas.width / 4, Canvas.height / 4, width, height, Color.white)
+    Canvas.rect(Canvas.width / 4 + 1, Canvas.height / 4 + 1, width - 2, height - 2, Color.white)
+    Canvas.rectfill(Canvas.width / 4 + 2, Canvas.height / 4 + 2, width - 4, height - 4, Color.black)
+    var top = Canvas.height / 4 + 4
+    var y = top
+    var x = Canvas.width / 4 + 4 + 8
+    for (item in _items) {
+      Canvas.print(item[0], x, y, Color.green)
+      y = y + 8
+    }
+    Canvas.print(">", x - 8, top + _position * 8, Color.green)
+  }
+}
+
 class MessageAnimation is Animation {
   construct begin(text, color, timeout) {
     _height = 0
@@ -100,11 +144,15 @@ class GameLoseAnimation is MessageAnimation {
 }
 
 class WaitAnimation is Animation {
+  construct begin(frames) {
+    _bounds = frames
+  }
   construct begin() {
+    _bounds = 10
   }
   update(view) {
     super.update(view)
-    if (t > 10) {
+    if (t > _bounds) {
       done = true
     }
   }
@@ -188,19 +236,20 @@ class GameView {
     return events.map {|event|
       if (event is GameOverEvent) {
         _gameOver = true
-        return GameLoseAnimation.begin()
+        return  [ GameLoseAnimation.begin() ]
       } else if (event is LogEvent) {
         _log.add(event.text)
         _log = _log.skip(M.max(0, _log.count - 3)).toList
       } else if (event is MenuEvent) {
         System.print(event.menu)
+        return [ WaitAnimation.begin(8), MenuEffect.begin(event.menu) ]
       } else if (event is MoveEvent) {
         if (event.source == _model.player) {
-          return CameraAnimation.begin()
+          return [ CameraAnimation.begin() ]
         }
       }
-      return null
-    }.where {|animation| animation != null }.toList
+      return []
+    }.reduce ([]) {|acc, animation| acc + animation }.toList
   }
 
   draw() {
