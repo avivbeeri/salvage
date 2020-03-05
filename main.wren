@@ -4,7 +4,11 @@ import "dome" for Process
 import "input" for Keyboard
 import "./model" for GameModel
 import "./view" for GameView
+import "./keys" for Key
 import "./generator" for StaticRoomGenerator
+import "./filter" for ColorBlindFilter
+
+var PAL_KEY = Key.new("tab", 1, true)
 
 class Game {
   static init() {
@@ -15,9 +19,13 @@ class Game {
     Window.resize(scale * Canvas.width, scale * Canvas.height)
     Window.title = "Salvage"
     __view = TitleMenu.init()
+    __pal = 0
   }
 
   static update() {
+    if (PAL_KEY.update()) {
+      __pal = __pal + 1
+    }
     if (Keyboard.isKeyDown("escape")) {
       Process.exit()
     }
@@ -29,6 +37,7 @@ class Game {
 
   static draw(dt) {
     __view.draw()
+    ColorBlindFilter.apply(__pal)
   }
 
 }
@@ -49,6 +58,7 @@ class TitleMenu {
     var top = 10
     Canvas.print("Press space to begin", left, top, Color.white)
     Canvas.print("    the mission", left, top + 8, Color.white)
+
   }
 
 }

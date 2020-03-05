@@ -6,6 +6,7 @@ import "./line" for LineVisitor
 import "math" for Vec
 import "./tiles" for Tiles
 
+
 class GameResult {
   progress=(v) { _progress = v}
   progress { _progress }
@@ -40,6 +41,7 @@ class GameModel {
     _turn = 0
     _data = {}
     recalculate()
+
 
   }
 

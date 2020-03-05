@@ -26,16 +26,8 @@ var Roomnames = [
   "air processing",
   "airlock"
 ]
-var R = Random.new(12345)
+var R = Random.new(12346)
 
-class Feature {
-  construct new(type, pos) {
-    _type = type
-    _pos = pos
-  }
-  pos { _pos }
-  type { _type }
-}
 
 class Room {
   construct new(pos, size) {
@@ -131,27 +123,10 @@ var ROOM_HEIGHT = 16
 
 class StaticRoomGenerator {
   static generate(seed) {
-    var rooms = []
-    /*
-    for (gridY in 0...5) {
-      for (gridX in 0...5) {
-        var room = Room.new(Vec.new(gridX * (ROOM_WIDTH - 1), gridY * (ROOM_HEIGHT - 1)), Vec.new(ROOM_WIDTH, ROOM_HEIGHT))
-        room.doors.add(Vec.new(gridX * (ROOM_WIDTH - 1) + ROOM_WIDTH - 1, 4))
-        rooms.add(room)
-      }
-    }
-    */
-
-    var room1 = Room.new(Vec.new(), Vec.new(ROOM_WIDTH, ROOM_HEIGHT))
-    room1.light = false
-    var room2 = Room.new(Vec.new(ROOM_WIDTH - 1, ROOM_HEIGHT / 2), Vec.new(ROOM_WIDTH, 3))
-    room2.light = true
-    var room3 = Room.new(Vec.new(ROOM_WIDTH * 2 - 2, 0), Vec.new(ROOM_WIDTH, ROOM_HEIGHT))
-    room1.doors.add(Vec.new(ROOM_WIDTH - 1, ROOM_HEIGHT / 2 + 1))
-    room2.doors.add(Vec.new(ROOM_WIDTH*2 - 2, ROOM_HEIGHT / 2 + 1))
-    rooms = [room1, room2, room3]
-
+    var rooms = FloorGenerator.generateDebugRooms()
+    rooms = FloorGenerator.generate(0 ,0)
     var map = TileMap.init(320, 320, Tiles.empty)
+    var doors = []
     for (room in rooms) {
       room.map = map
       var start = room.pos
@@ -171,13 +146,13 @@ class StaticRoomGenerator {
       }
 
       for (door in room.doors) {
+        doors.add(door)
         /*
         if (map.get(door.x, door.y).type != Tiles.door.type) {
            map.set(door.x, door.y, Tiles.door)
         }
         room.tiles.add(map.get(door.x, door.y))
         */
-        room.addTile(door.x, door.y, Tiles.door)
       }
 
       for (feature in room.features) {
@@ -185,6 +160,13 @@ class StaticRoomGenerator {
       }
 
       room.setTileProperty("light", 2)
+    }
+    rooms.each {|room|
+      doors.each {|door|
+        if (room.isInRoom(door)) {
+          room.addTile(door.x, door.y, Tiles.door)
+        }
+      }
     }
 
     map.set(3, 2, Tiles.console)
@@ -208,7 +190,9 @@ class StaticRoomGenerator {
     ]
 
     var level = Level.new(map, entities, rooms)
-    level.addPlayer(Player.new(4, 4))
+    level.addPlayer(Player.new(rooms[0].pos.x + 1, rooms[0].pos.y + 1))
+    System.print("player: %(Vec.new(rooms[0].pos.x + 1, rooms[0].pos.y + 1))")
+
 
     rooms.each {|room|
       var player = level.player
@@ -219,4 +203,50 @@ class StaticRoomGenerator {
 
     return level
   }
+}
+
+class FloorGenerator {
+  static generateDebugRooms() {
+    var room1 = Room.new(Vec.new(), Vec.new(ROOM_WIDTH, ROOM_HEIGHT))
+    room1.light = false
+    var room2 = Room.new(Vec.new(ROOM_WIDTH - 1, ROOM_HEIGHT / 2), Vec.new(ROOM_WIDTH, 3))
+    room2.light = true
+    var room3 = Room.new(Vec.new(ROOM_WIDTH * 2 - 2, 0), Vec.new(ROOM_WIDTH, ROOM_HEIGHT))
+    room1.doors.add(Vec.new(ROOM_WIDTH - 1, ROOM_HEIGHT / 2 + 1))
+    room2.doors.add(Vec.new(ROOM_WIDTH*2 - 2, ROOM_HEIGHT / 2 + 1))
+    return [room1, room2, room3]
+  }
+
+  static generate(gridW, gridH) {
+    var centerX = ROOM_WIDTH
+    var centerY = ROOM_HEIGHT
+
+    var nextPos = []
+    var rooms = []
+
+    var quadrants = [
+      Vec.new(-1, -1),
+      Vec.new(0, 0),
+      Vec.new(-1, 0),
+      Vec.new(0, -1)
+    ]
+
+    for (quadrant in quadrants) {
+      var height = R.int(7, ROOM_HEIGHT)
+      var width = R.int(7, ROOM_WIDTH)
+      var pos = Vec.new(centerX + (width - 1) * quadrant.x, centerY + (height - 1) * quadrant.y)
+      var dim = Vec.new(width, height)
+      System.print("%(pos) -> %(pos + dim)")
+      var room = Room.new(pos, dim)
+      rooms.add(room)
+
+      // Add door(s)?
+      // Environmental properties
+      room.light = R.int(2) % 2 == 0
+      room.doors.add(pos + Vec.new(0, (height / 2).floor))
+    }
+
+    return rooms
+  }
+
 }

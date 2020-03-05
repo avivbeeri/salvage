@@ -56,7 +56,6 @@ class FlashAnimation is Animation {
   update(view) {
     super.update(view)
     done = t >= _length
-    System.print(done)
   }
 
   draw() {
@@ -269,10 +268,10 @@ class GameView {
         _gameOver = true
         return  [ GameLoseAnimation.begin() ]
       } else if (event is LogEvent) {
+        System.print(event.text)
         _log.add([ event.priority, event.text ])
         _log = _log.skip(M.max(0, _log.count - 3)).toList
       } else if (event is MenuEvent) {
-        System.print(event.menu)
         return [ WaitAnimation.begin(8), MenuEffect.begin(event.menu) ]
       } else if (event is SelfDestructEvent) {
         return [ FlashAnimation.begin() ]
