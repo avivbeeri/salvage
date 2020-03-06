@@ -1,8 +1,9 @@
-import "math" for Vec
-import "random" for Random
+import "math" for Vec, M
 import "./map" for TileMap, Tile
 import "./actor" for Player, Blob
 import "./tiles" for Tiles
+
+import "./test" for FloorGenerator, R
 
 var NameIndex = 0
 var Roomnames = [
@@ -26,7 +27,6 @@ var Roomnames = [
   "air processing",
   "airlock"
 ]
-var R = Random.new(12346)
 
 
 class Room {
@@ -39,6 +39,23 @@ class Room {
     _doors = []
     _tiles = []
     _features = []
+  }
+  print() {
+    var start = pos
+    var max = pos + size - Vec.new(1, 1)
+    for (y in start.y .. max.y) {
+      for (x in start.x .. max.x) {
+        if (_map.get(x, y).type == Tiles.empty.type) {
+          if (y == start.y || y == max.y || x == start.x || x == max.x) {
+            addTile(x, y, Tiles.wall)
+          } else {
+            addTile(x, y, Tiles.floor)
+          }
+        } else {
+          tiles.add(_map.get(x, y))
+        }
+      }
+    }
   }
 
   map=(v) { _map = v }
@@ -123,44 +140,62 @@ var ROOM_HEIGHT = 16
 
 class StaticRoomGenerator {
   static generate(seed) {
-    var rooms = FloorGenerator.generateDebugRooms()
-    rooms = FloorGenerator.generate(0 ,0)
+    var generator = FloorGenerator.init()
+    var rooms = generator.rooms
+    //rooms = FloorGenerator.generate(0 ,0)
     var map = TileMap.init(320, 320, Tiles.empty)
     var doors = []
     for (room in rooms) {
       room.map = map
-      var start = room.pos
-      var max = room.pos + room.size - Vec.new(1, 1)
-      for (y in start.y .. max.y) {
-        for (x in start.x .. max.x) {
-          if (map.get(x, y).type == Tiles.empty.type) {
-            if (y == start.y || y == max.y || x == start.x || x == max.x) {
-              room.addTile(x, y, Tiles.wall)
-            } else {
-              room.addTile(x, y, Tiles.floor)
-            }
-          } else {
-            room.tiles.add(map.get(x, y))
-          }
-        }
-      }
+      room.print()
 
       for (door in room.doors) {
         doors.add(door)
-        /*
-        if (map.get(door.x, door.y).type != Tiles.door.type) {
-           map.set(door.x, door.y, Tiles.door)
-        }
-        room.tiles.add(map.get(door.x, door.y))
-        */
-      }
-
-      for (feature in room.features) {
-
       }
 
       room.setTileProperty("light", 2)
     }
+    for (corridor in generator.corridors) {
+      var width = 3
+      var perp = corridor[1].perp
+      var cross = corridor[1].perp * width
+      var len = perp * width
+      System.print(" --- carving ")
+      var start = corridor[0]
+      System.print("Door is at %(start) -> %(corridor[1])")
+      var pos = start + corridor[1]
+      var tile = map.get(pos)
+      while (tile.type == Tiles.empty.type || tile.type == Tiles.door.type) {
+        if (tile.type == Tiles.door.type) {
+        } else if (tile.type == Tiles.empty.type) {
+          map.set(pos.x, pos.y, Tiles.floor)
+        }
+        pos = pos + corridor[1]
+        len = len + corridor[1]
+        tile = map.get(pos)
+      }
+      len = pos - start + cross
+      // calculate top-left
+      var minX = start.x + M.min(0, len.x) - (cross.x / 2).floor
+      var minY = start.y + M.min(0, len.y) - (cross.y / 2).floor
+      var topLeft = Vec.new(minX, minY) - corridor[1]
+      len = Vec.new(len.x.abs, len.y.abs)
+
+      System.print("Corridor dimensions:")
+      System.print(Vec.new(minX, minY))
+      System.print(len)
+      var room = Room.new(Vec.new(minX, minY), len)
+      room.map = map
+      room.light = R.int(2) % 2 == 0
+      room.print()
+      room.doors.add(start)
+      room.doors.add(pos)
+      for (door in room.doors) {
+        doors.add(door)
+      }
+      rooms.add(room)
+    }
+
     rooms.each {|room|
       doors.each {|door|
         if (room.isInRoom(door)) {
@@ -205,6 +240,8 @@ class StaticRoomGenerator {
   }
 }
 
+/*
+
 class FloorGenerator {
   static generateDebugRooms() {
     var room1 = Room.new(Vec.new(), Vec.new(ROOM_WIDTH, ROOM_HEIGHT))
@@ -248,5 +285,22 @@ class FloorGenerator {
 
     return rooms
   }
-
 }
+
+class GridNode {
+  construct new() {
+    _neighbours = []
+  }
+  neighbours { _neighbours }
+}
+
+class GridGenerator {
+  static generate(w, h) {
+    var start = GridNode.new()
+    var names = []
+    for (n in 0..R.int(4))  {
+    }
+  }
+}
+*/
+

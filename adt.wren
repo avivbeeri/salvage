@@ -91,21 +91,6 @@ class Heap {
   }
 }
 
-var heap = Heap.init()
-heap.insert(42)
-heap.insert(1)
-heap.insert(54)
-heap.insert(9)
-heap.insert(107)
-heap.insert(11)
-System.print("Added")
-System.print(heap.del())
-System.print(heap.del())
-System.print(heap.del())
-System.print(heap.del())
-System.print(heap.del())
-System.print(heap.del())
-
 class Hashable {
   hash() { this.toString }
 }
