@@ -6,8 +6,8 @@ import "math" for Vec, M
 import "./adt" for Queue
 
 var R = Random.new(1)
-var ROOM_HEIGHT = 16
-var ROOM_WIDTH = 16
+var ROOM_HEIGHT = 12
+var ROOM_WIDTH = 12
 
 class Area {
   construct new(pos, size) {
@@ -22,8 +22,8 @@ class Area {
   rooms { _rooms }
 }
 
-var CONNECT_SIZE = Vec.new(9, 9)
-var HAB_SIZE = Vec.new(32, 32)
+var CONNECT_SIZE = Vec.new(5, 5)
+var HAB_SIZE = Vec.new(ROOM_WIDTH * 2, ROOM_HEIGHT * 2)
 
 class Game {
   static init() {
@@ -147,44 +147,6 @@ class FloorGenerator {
 
         var sourceDim = (sourceRoom.size / 2)
         var sourceExitPos = (sourceCenter + Vec.new(exit.x * sourceDim.x, exit.y * sourceDim.y))
-
-        /*
-        // var targetDim = floorVec(targetRoom.size / 2)
-        // var targetExitPos = (targetCenter - Vec.new(exit.x * targetDim.x, exit.y * targetDim.y))
-
-        var targetArea = getArea(area.pos + exit)
-        System.print(targetArea)
-        var targetAreaCenter = floorVec(targetArea.pos * (HAB_SIZE.x + CONNECT_SIZE.x) + (HAB_SIZE / 2))
-        // _rooms.add(Room.new(exitPos, (exit * HAB_SIZE.y / 2)))
-        if ((sourceExitPos - areaCenter).dot(exit.perp) <= (targetExitPos - areaCenter).dot(exit.perp)) {
-          System.print([sourceExitPos, targetExitPos])
-          var dir = (targetExitPos - sourceExitPos)
-          targetExitPos.x = sourceExitPos.x + dir.x.abs * exit.x
-          targetExitPos.y = sourceExitPos.y + dir.y.abs * exit.y
-        } else {
-        // } else if ((sourceExitPos - targetAreaCenter).dot(exit.perp) < (targetExitPos - targetAreaCenter).dot(exit.perp)) {
-          System.print([targetExitPos, sourceExitPos])
-          var dir = (sourceExitPos - targetExitPos)
-          sourceExitPos.x = targetExitPos.x - dir.x.abs * exit.x
-          sourceExitPos.y = targetExitPos.y - dir.y.abs * exit.y
-        }
-          */
-        // sourceRoom.doors.add(sourceExitPos)
-        // targetRoom.doors.add(targetExitPos)
-
-        /*
-        var minX = M.min(sourceExitPos.x, targetExitPos.x)
-        var maxX = M.max(sourceExitPos.x, targetExitPos.x)
-        var minY = M.min(sourceExitPos.y, targetExitPos.y)
-        var maxY = M.max(sourceExitPos.y, targetExitPos.y)
-
-        var corridor = Room.new(Vec.new(minX + exit.perp.x, minY - exit.perp.y), Vec.new((maxX-minX) + exit.perp.manhattan * 3, maxY - minY + exit.perp.manhattan * 3))
-        corridor.doors.add(sourceExitPos + exit.perp)
-        corridor.doors.add(targetExitPos + exit.perp)
-        area.rooms.add(corridor)
-        rooms.add(corridor)
-        */
-
 
         var pos = sourceExitPos
         if (exit.x > 0 || exit.y > 0) {

@@ -154,7 +154,6 @@ class ChargeBall is Actor {
       return Action.none()
     } else {
       var dir = Dir[_direction] + pos
-      System.print(dir)
       return ChargeMoveAction.new(_direction)
     }
   }

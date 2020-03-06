@@ -441,6 +441,12 @@ class GameView {
     if (_model["self-destruct"] != null) {
       Canvas.print("%(_model["self-destruct"]) turns", Canvas.width - 10 * TILE_WIDTH, Canvas.height - 10, Color.red)
     }
+    var name = _model["currentRooms"][0].name
+    var nameLeft = left + (width - name.count * 8) / 2
+    var nameTop = Canvas.height - 30
+    Canvas.rectfill(left + 2, nameTop - 2, width - 4, Canvas.height - (nameTop - 2), Color.darkgray)
+    Canvas.print(name, nameLeft, nameTop, Color.orange)
+
 
   }
 

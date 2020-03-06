@@ -7,35 +7,42 @@ import "./test" for FloorGenerator, R
 
 var NameIndex = 0
 var Roomnames = [
-  "corridor",
-  "bridge",
-  "cargo hold",
-  "kitchen",
-  "common area",
-  "laboratory",
-  "recreation room",
-  "sleeping quarters",
-  "reactor",
-  "waste processing",
-  "hydroponics bay",
-  "observation deck",
-  "canteen",
-  "medical bay",
-  "brig",
-  "containment room",
-  "gravitational core",
-  "air processing",
-  "airlock"
+  ["corridor"],
+  ["bridge"],
+  ["cargo hold"],
+  ["kitchen"],
+  ["common area"],
+  ["laboratory"],
+  ["recreation"],
+  ["crew quarters"],
+  ["reactor"],
+  ["recycling"],
+  ["hydroponics"],
+  ["observation"],
+  ["canteen"],
+  ["medical bay"],
+  ["brig"],
+  ["quarantine"],
+  ["grav core"],
+  ["air processing"],
+  ["airlock"]
 ]
-
+R.shuffle(Roomnames)
 
 class Room {
   construct new(pos, size) {
+    init(pos, size)
+    NameIndex = (NameIndex + 1) % Roomnames.count
+    _name = Roomnames[NameIndex][0]
+  }
+  construct new(pos, size, name) {
+    init(pos, size)
+    _name = name
+  }
+
+  init(pos, size) {
     _size = size
     _pos = pos
-    // R.shuffle(Roomnames)
-    _name = Roomnames[NameIndex]
-    NameIndex = (NameIndex + 1) % Roomnames.count
     _doors = []
     _tiles = []
     _features = []
@@ -49,7 +56,11 @@ class Room {
           if (y == start.y || y == max.y || x == start.x || x == max.x) {
             addTile(x, y, Tiles.wall)
           } else {
-            addTile(x, y, Tiles.floor)
+            if (_name == "") {
+
+            } else {
+              addTile(x, y, Tiles.floor)
+            }
           }
         } else {
           tiles.add(_map.get(x, y))
@@ -148,6 +159,7 @@ class StaticRoomGenerator {
     for (room in rooms) {
       room.map = map
       room.print()
+      // TODO: Set properties of room
 
       for (door in room.doors) {
         doors.add(door)
@@ -184,7 +196,7 @@ class StaticRoomGenerator {
       System.print("Corridor dimensions:")
       System.print(Vec.new(minX, minY))
       System.print(len)
-      var room = Room.new(Vec.new(minX, minY), len)
+      var room = Room.new(Vec.new(minX, minY), len, "corridor")
       room.map = map
       room.light = R.int(2) % 2 == 0
       room.print()
@@ -202,27 +214,28 @@ class StaticRoomGenerator {
           room.addTile(door.x, door.y, Tiles.door)
         }
       }
+
+      if (room.name == "reactor") {
+        System.print("reactor!")
+        map.set(room.pos.x + 2, room.pos.y + 2, Tiles.console)
+        room.tiles.add(map.get(room.pos.x + 2, room.pos.y + 2))
+      }
     }
 
-    map.set(3, 2, Tiles.console)
+    var entities = []
     map.set(14, 4, Tiles.sludge)
     rooms.each {|room|
       if (room.isInRoom(14, 4)) {
         room.tiles.add(map.get(14, 4))
       }
-    }
+
+      if (R.int(3) % 2 == 0) {
+        var blob = Blob.new(1 + room.pos.x + R.int(room.size.x - 2), 1 + room.pos.y + R.int(room.size.y - 2))
+        entities.add(blob)
+      }
 
 
-/*
-    map.set(3, 0, Tiles.teleport)
-    for (x in 0...7) {
-      map.set(x, 4, Tiles.wall)
     }
-    */
-    var entities = [
-      Blob.new(14, 5),
-      Blob.new(5, 3)
-    ]
 
     var level = Level.new(map, entities, rooms)
     level.addPlayer(Player.new(rooms[0].pos.x + 1, rooms[0].pos.y + 1))
@@ -253,54 +266,5 @@ class FloorGenerator {
     room2.doors.add(Vec.new(ROOM_WIDTH*2 - 2, ROOM_HEIGHT / 2 + 1))
     return [room1, room2, room3]
   }
-
-  static generate(gridW, gridH) {
-    var centerX = ROOM_WIDTH
-    var centerY = ROOM_HEIGHT
-
-    var nextPos = []
-    var rooms = []
-
-    var quadrants = [
-      Vec.new(-1, -1),
-      Vec.new(0, 0),
-      Vec.new(-1, 0),
-      Vec.new(0, -1)
-    ]
-
-    for (quadrant in quadrants) {
-      var height = R.int(7, ROOM_HEIGHT)
-      var width = R.int(7, ROOM_WIDTH)
-      var pos = Vec.new(centerX + (width - 1) * quadrant.x, centerY + (height - 1) * quadrant.y)
-      var dim = Vec.new(width, height)
-      System.print("%(pos) -> %(pos + dim)")
-      var room = Room.new(pos, dim)
-      rooms.add(room)
-
-      // Add door(s)?
-      // Environmental properties
-      room.light = R.int(2) % 2 == 0
-      room.doors.add(pos + Vec.new(0, (height / 2).floor))
-    }
-
-    return rooms
-  }
-}
-
-class GridNode {
-  construct new() {
-    _neighbours = []
-  }
-  neighbours { _neighbours }
-}
-
-class GridGenerator {
-  static generate(w, h) {
-    var start = GridNode.new()
-    var names = []
-    for (n in 0..R.int(4))  {
-    }
-  }
 }
 */
-

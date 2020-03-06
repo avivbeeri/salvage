@@ -102,7 +102,6 @@ class MoveAction is Action {
   energy { _energy || 0 }
 
   perform(result) {
-    System.print("Action(%(type)): %(actor.type)")
     if (_dir == null) {
       result.alternate = Action.none()
       return true
