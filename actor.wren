@@ -166,7 +166,9 @@ class ChargeBall is Actor {
       return Action.none()
     } else if (state == "hit") {
       game.destroyEntity(this)
-      game.player.state["charge"] = null
+      if (game.player.state["charge"] == this) {
+        game.player.state["charge"] = null
+      }
     } else {
       var dir = _direction + pos
       return ChargeMoveAction.new(_direction)

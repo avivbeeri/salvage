@@ -166,7 +166,7 @@ class StaticRoomGenerator {
     var generator = FloorGenerator.init()
     var rooms = generator.rooms
     //rooms = FloorGenerator.generate(0 ,0)
-    var map = TileMap.init(320, 320, Tiles.empty)
+    var map = TileMap.init(420, 420, Tiles.empty)
     var doors = []
     for (room in rooms) {
       room.map = map

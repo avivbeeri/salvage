@@ -188,7 +188,7 @@ class ChargeMoveAction is MoveAction {
   }
   perform(result) {
     // var validMove = super.perform(result)
-    var validMove = super.verify(direction)
+    var validMove = super.verify(direction, false)
     var target = actor.pos + direction
     if (!validMove) {
       var attack = AttackAction.new(direction, 1)
@@ -202,17 +202,14 @@ class ChargeMoveAction is MoveAction {
     } else {
       actor.pos.x = target.x
       actor.pos.y = target.y
-      var direction = direction
-      if (actor.state == "charging") {
-        direction = Vec.new()
+      if (actor.state != "charging") {
+        var attack = AttackAction.new(direction, 1)
+        attack.bind(actor)
+        var valid = attack.perform(result)
+        if (valid) {
+          actor.state = "hit"
+        }
       }
-      var attack = AttackAction.new(direction, 1)
-      attack.bind(actor)
-      var valid = attack.perform(result)
-      if (valid) {
-        actor.state = "hit"
-      }
-      System.print("6")
     }
     return true
   }

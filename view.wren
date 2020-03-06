@@ -372,7 +372,7 @@ class GameView {
           Canvas.print("\%", offX + TILE_WIDTH * camera.x, offY + TILE_HEIGHT * camera.y, Color.white)
         }
       } else if (entity.type == "blob") {
-        Canvas.print("s", offX + TILE_WIDTH * entity.x, offY + TILE_HEIGHT * entity.y, Color.green)
+        Canvas.print("j", offX + TILE_WIDTH * entity.x, offY + TILE_HEIGHT * entity.y, Color.green)
       } else if (entity.type == "chargeball") {
         if (entity.state == "charging") {
           var diff = entity.pos - player.pos
