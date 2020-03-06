@@ -5,7 +5,7 @@ import "math" for Vec, M
 
 import "./adt" for Queue
 
-var R = Random.new(1)
+var R = Random.new()
 var ROOM_HEIGHT = 12
 var ROOM_WIDTH = 12
 

@@ -101,13 +101,14 @@ class MoveAction is Action {
   direction { _dir }
   energy { _energy || 0 }
 
-  verify(dir) {
+  verify (dir) { verify(dir, false) }
+  verify(dir, ignoreEntities) {
     var dest = actor.pos + direction
     var tile = game.map.get(dest)
     var isSolid = tile["solid"]
     var isObscure = tile["obscure"]
     var isOccupied = game.getEntitiesOnTile(dest.x, dest.y).where {|entity| entity.solid }.count > 0
-    return !isSolid && !isObscure && !isOccupied
+    return !isSolid && !isObscure && (ignoreEntities || !isOccupied)
   }
 
   perform(result) {

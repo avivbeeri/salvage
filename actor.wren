@@ -134,7 +134,7 @@ class Blob is Actor {
     ])
     var action = MoveAction.new(dir)
     action.bind(this)
-    if (action.verify(dir)) {
+    if (action.verify(dir, true)) {
       return MoveAction.new(dir)
     }
     return DanceAction.new()
