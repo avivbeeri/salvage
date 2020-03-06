@@ -99,7 +99,7 @@ class GameModel {
       if (_data["self-destruct"] != null) {
         _data["self-destruct"] = _data["self-destruct"] - 1
         if (_data["self-destruct"] <= 0) {
-          addEventToResult(LogEvent.new("Station Exploded."))
+          addEventToResult(LogEvent.new("Station Exploded.", "high"))
           addEventToResult(GameOverEvent.new())
         }
       }

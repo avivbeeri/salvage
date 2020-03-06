@@ -5,39 +5,50 @@ import "./tiles" for Tiles
 
 import "./test" for FloorGenerator, R
 
+// Generic Breed Object, for rooms, items, enemies, etc
+class Breed {
+  construct new(name, props) {
+    _name = name
+    _props = props
+  }
+  name { _name }
+  props { _props }
+}
+
 var NameIndex = 0
-var Roomnames = [
-  ["corridor"],
-  ["bridge"],
-  ["cargo hold"],
-  ["kitchen"],
-  ["common area"],
-  ["laboratory"],
-  ["recreation"],
-  ["crew quarters"],
-  ["reactor"],
-  ["recycling"],
-  ["hydroponics"],
-  ["observation"],
-  ["canteen"],
-  ["medical bay"],
-  ["brig"],
-  ["quarantine"],
-  ["grav core"],
-  ["air processing"],
-  ["airlock"]
+var RoomTypes = [
+  Breed.new("corridor", [ 1]),
+  Breed.new("bridge", [ 1]),
+  Breed.new("cargo hold", [ 1]),
+  Breed.new("kitchen", [ 1]),
+  Breed.new("common area", [ 1]),
+  Breed.new("laboratory", [ 1]),
+  Breed.new("recreation", [ 1]),
+  Breed.new("crew quarters", [ 1]),
+  Breed.new("reactor", [ 1]),
+  Breed.new("recycling", [ 1]),
+  Breed.new("hydroponics", [ 1]),
+  Breed.new("observation", [ 1]),
+  Breed.new("canteen", [ 1]),
+  Breed.new("medical bay", [ 2]),
+  Breed.new("brig", [ 2]),
+  Breed.new("quarantine", [ 3]),
+  Breed.new("grav core", [ 1]),
+  Breed.new("air processing", [ 1]),
+  Breed.new("airlock", [ 1])
 ]
-R.shuffle(Roomnames)
+// R.shuffle(RoomTypes)
+
 
 class Room {
   construct new(pos, size) {
     init(pos, size)
-    NameIndex = (NameIndex + 1) % Roomnames.count
-    _name = Roomnames[NameIndex][0]
+    NameIndex = (NameIndex + 1) % RoomTypes.count
+    _breed = RoomTypes[NameIndex]
   }
-  construct new(pos, size, name) {
+  construct new(pos, size, breed) {
     init(pos, size)
-    _name = name
+    _breed = breed
   }
 
   init(pos, size) {
@@ -78,7 +89,7 @@ class Room {
   doors { _doors }
   tiles { _tiles }
   features { _features }
-  name { _name }
+  breed { _breed }
 
   light { _light }
   light=(v) { _light = v }
@@ -196,7 +207,7 @@ class StaticRoomGenerator {
       System.print("Corridor dimensions:")
       System.print(Vec.new(minX, minY))
       System.print(len)
-      var room = Room.new(Vec.new(minX, minY), len, "corridor")
+      var room = Room.new(Vec.new(minX, minY), len, RoomTypes[0])
       room.map = map
       room.light = R.int(2) % 2 == 0
       room.print()
@@ -215,7 +226,7 @@ class StaticRoomGenerator {
         }
       }
 
-      if (room.name == "reactor") {
+      if (room.breed.name == "reactor") {
         System.print("reactor!")
         map.set(room.pos.x + 2, room.pos.y + 2, Tiles.console)
         room.tiles.add(map.get(room.pos.x + 2, room.pos.y + 2))
@@ -229,7 +240,8 @@ class StaticRoomGenerator {
         room.tiles.add(map.get(14, 4))
       }
 
-      if (R.int(3) % 2 == 0) {
+      var maxEnemies = room.breed.props[0]
+      if (R.int(maxEnemies + 1) % maxEnemies < (maxEnemies / 2)) {
         var blob = Blob.new(1 + room.pos.x + R.int(room.size.x - 2), 1 + room.pos.y + R.int(room.size.y - 2))
         entities.add(blob)
       }
