@@ -1,4 +1,59 @@
 import "math" for M, Vec
+import "./adt" for Queue
+import "./map" for Elegant
+
+var DIRS = [
+  Vec.new(0, 1),
+  Vec.new(-1, 0),
+  Vec.new(1, 0),
+  Vec.new(0, -1),
+]
+
+class GridVisitor {
+  static bfs(map, start, test) {
+    var frontier = Queue.init()
+    var visited = {}
+    visited[Elegant.pair(start)] = true
+    frontier.enqueue(start)
+    while (!frontier.empty) {
+      var current = frontier.dequeue()
+      // TODO: This should do something
+      if (test != null) {
+        test.call(current)
+      }
+      for (dir in DIRS) {
+        var next = current + dir
+        if (next.x < 0 || next.x >= map.width || next.y < 0 || next.y >= map.height) {
+        } else {
+          if (!visited[Elegant.pair(next)]) {
+            frontier.enqueue(next)
+            visited[Elegant.pair(next)] = true
+          }
+        }
+      }
+    }
+  }
+  static findPath(map, start) {
+    var frontier = Queue.init()
+    var cameFrom = {}
+    cameFrom[Elegant.pair(start)] = null
+    frontier.enqueue(start)
+    while (!frontier.empty) {
+      var current = frontier.dequeue()
+      for (dir in DIRS) {
+        var next = current + dir
+        if (next.x < 0 || next.x >= map.width || next.y < 0 || next.y >= map.height) {
+        } else {
+          if (!cameFrom.containsKey(Elegant.pair(next))) {
+            frontier.enqueue(next)
+            cameFrom[Elegant.pair(next)] = current
+          }
+        }
+      }
+    }
+    return cameFrom
+  }
+}
 
 class LineVisitor {
   static walk(p0, p1) {

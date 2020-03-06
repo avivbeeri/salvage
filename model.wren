@@ -2,7 +2,7 @@ import "./dir" for Dir
 import "./action" for MoveAction
 import "./events" for LogEvent, GameOverEvent
 import "./actor" for Player
-import "./line" for LineVisitor
+import "./line" for LineVisitor, GridVisitor
 import "math" for Vec
 import "./tiles" for Tiles
 
@@ -29,6 +29,7 @@ class GameModel {
   turn { _turn }
   isPlayerTurn() { _entities[_turn] == _player }
   state { _data }
+  pathMap { _mapMap }
   [index] { _data[index] }
   [index]=(v) { _data[index] = v }
 
@@ -40,6 +41,7 @@ class GameModel {
     _player = _entities.where {|entity| entity.type == "player" }.toList[0]
     _turn = 0
     _data = {}
+    _pathMap = null
     recalculate()
 
 
@@ -81,7 +83,9 @@ class GameModel {
     // Some actions may consume energy on failure?
     if (_result.progress) {
       actor.finishTurn(action)
-      recalculate()
+      if (currentActor == _player) {
+        recalculate()
+      }
       checkConditions()
       nextTurn()
     }
@@ -107,7 +111,8 @@ class GameModel {
   }
 
   recalculate() {
-    var facing = Dir[_player.state["facing"]]
+    // _pathMap = GridVisitor.findPath(_map, _player.pos)
+    var facing = _player.state["facing"]
     var min = _player.pos
     var length = 7
     var cone = facing * length

@@ -2,6 +2,7 @@ import "dome" for Window
 import "graphics" for Canvas, Color, ImageData
 import "input" for Keyboard
 import "math" for M, Vec
+import "./dir" for Dir
 import "./generator" for StaticRoomGenerator
 import "./action" for PlayerMoveAction,
   DanceAction,
@@ -19,6 +20,8 @@ import "./events" for
   SelfDestructEvent,
   MenuEvent
 
+import "./line" for GridVisitor
+
 
 var BORDER = 9
 var TILE_WIDTH = 8
@@ -30,7 +33,7 @@ var Inputs = [
   "right",
   "up",
   "down"
-].map {|key| Key.new(key, PlayerMoveAction.new(key), true) }.toList
+].map {|key| Key.new(key, PlayerMoveAction.new(Dir[key]), true) }.toList
 var SPACE_KEY = Key.new("space", RestAction.new(), true)
 Inputs.add(SPACE_KEY)
 Inputs.add(Key.new("d", DanceAction.new(), true))
@@ -197,10 +200,10 @@ class CameraAnimation is Animation {
     camera.x = (camera.x - M.sign(camera.x - player.x) * (1/ TILE_WIDTH))
     camera.y = (camera.y - M.sign(camera.y - player.y) * (1/ TILE_HEIGHT))
 
-    if ((camera.x - player.x).abs < 0.2 && (camera.y - player.y).abs < 0.2) {
+    if ((camera.x - player.x).abs < 0.1 && (camera.y - player.y).abs < 0.1) {
       done = true
-      camera.x = M.round(camera.x)
-      camera.y = M.round(camera.y)
+      camera.x = player.x // M.round(camera.x)
+      camera.y = player.y // M.round(camera.y)
     }
   }
 }
@@ -220,6 +223,12 @@ class GameView {
     _gameOver = false
     _camera = Vec.new(_model.player.x, _model.player.y)
     updateState()
+    /*
+    GridVisitor.bfs(_model.map, Vec.new(), Fn.new {|pos|
+      Canvas.rectfill(pos.x * TILE_WIDTH, pos.y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, Color.purple)
+    })
+    */
+    GridVisitor.findPath(_model.map, _model.player.pos)
   }
 
   camera { _camera }
@@ -230,7 +239,7 @@ class GameView {
   }
 
   update() {
-    Inputs.each { |input| input.update() }
+      Inputs.each { |input| input.update() }
     _ready = _animations.count == 0
     // _ready = _ready && !result.progress && result.events.count == 0
     if (_ready) {
@@ -274,6 +283,8 @@ class GameView {
         return [ FlashAnimation.begin() ]
       } else if (event is MoveEvent) {
         if (event.source == _model.player) {
+          camera.x = _model.player.x // M.round(camera.x)
+          camera.y = _model.player.y // M.round(camera.y)
           return [ CameraAnimation.begin() ]
         }
       }
@@ -339,6 +350,8 @@ class GameView {
             }
             Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, color)
             Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.black)
+          } else {
+            Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.blue)
           }
         }
       }
@@ -436,6 +449,8 @@ class GameView {
       Canvas.rectfill(left, uiTop, 2, 12, Color.darkgray)
       Canvas.rectfill(Canvas.width - 2, uiTop, 2, 12, Color.darkgray)
     }
+    var nameTop = Canvas.height - 30
+    Canvas.rectfill(left + 2, nameTop - 2, width - 4, Canvas.height - (nameTop - 2), Color.darkgray)
     uiTop = uiTop + 12 + 4
     Canvas.rectfill(left + 2, uiTop, width - 4, (Canvas.height - uiTop - 2), Color.black)
     if (_model["self-destruct"] != null) {
@@ -443,10 +458,7 @@ class GameView {
     }
     var name = _model["currentRooms"][0].breed.name
     var nameLeft = left + (width - name.count * 8) / 2
-    var nameTop = Canvas.height - 30
-    Canvas.rectfill(left + 2, nameTop - 2, width - 4, Canvas.height - (nameTop - 2), Color.darkgray)
     Canvas.print(name, nameLeft, nameTop, Color.orange)
-
 
   }
 

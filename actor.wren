@@ -2,6 +2,7 @@ import "./dir" for Dir
 import "./events" for LogEvent, GameOverEvent
 import "./action" for Action, MoveAction, DanceAction, ChargeMoveAction
 import "math" for M, Vec
+import "./test" for R
 
 var FULL_POWER = 1560
 
@@ -25,7 +26,7 @@ class Actor {
   construct new(type, x, y) {
     _pos = Vec.new(x, y)
       _type = type
-      _state = "ready"
+      _state = {}
       _energy = 0
       _speed = NORMAL_SPEED
       _visible = false
@@ -57,6 +58,7 @@ class Actor {
   x=(v) { _pos.x = v }
   y=(v) { _pos.y = v }
   pos { _pos }
+  pos=(v) { _pos = v }
   type { _type }
   getAction() { Action.new(null) }
   finishTurn(action) {
@@ -77,7 +79,7 @@ class Player is Actor {
       _action = null
       _power = (FULL_POWER * 1.00).floor // FULL_POWER
     state = {
-      "facing": "up"
+      "facing": Vec.new(0, -1)
     }
   }
 
@@ -115,6 +117,7 @@ class Blob is Actor {
     super("blob", x, y)
     speed = SLOWEST_SPEED
     visible = true
+    state["hp"] = 1
   }
 
   onDestroy() {
@@ -122,14 +125,19 @@ class Blob is Actor {
   }
 
   getAction() {
-    if (x > 0) {
-      if (game.doesTileContainEntity(x - 1, y)) {
-        return MoveAction.new(null)
-      }
-      return MoveAction.new(null)
-    } else {
-      return DanceAction.new()
+    // var dir = (pos - game.player.pos).unit
+    var dir = R.sample([
+      Vec.new(0, 1),
+      Vec.new(-1, 0),
+      Vec.new(1, 0),
+      Vec.new(0, -1),
+    ])
+    var action = MoveAction.new(dir)
+    action.bind(this)
+    if (action.verify(dir)) {
+      return MoveAction.new(dir)
     }
+    return DanceAction.new()
   }
 }
 
@@ -145,15 +153,22 @@ class ChargeBall is Actor {
   }
 
   owner { _owner }
+  finishTurn(action) {
+    if (state == "hit") {
+      gain()
+    } else {
+      super.finishTurn(action)
+    }
+  }
 
   getAction() {
     if (state == "charging") {
       return Action.none()
     } else if (state == "hit") {
       game.destroyEntity(this)
-      return Action.none()
+      game.player.state["charge"] = null
     } else {
-      var dir = Dir[_direction] + pos
+      var dir = _direction + pos
       return ChargeMoveAction.new(_direction)
     }
   }

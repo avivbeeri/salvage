@@ -16,6 +16,8 @@ class Tiles {
 
   // Features
   static teleport { Tile.new("*", { "teleport": true }) }
-  static console { Tile.new("?", { "solid": true, "menu": SelfDestructMenu }) }
+  static console { Tile.new("^", { "solid": true, "menu": SelfDestructMenu }) }
+  static consoleLeft { Tile.new("/", { "solid": true }) }
+  static consoleRight { Tile.new("\\", { "solid": true }) }
 }
 

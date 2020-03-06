@@ -25,7 +25,7 @@ var RoomTypes = [
   Breed.new("laboratory", [ 1]),
   Breed.new("recreation", [ 1]),
   Breed.new("crew quarters", [ 1]),
-  Breed.new("reactor", [ 1]),
+ //  Breed.new("reactor", [ 1]),
   Breed.new("recycling", [ 1]),
   Breed.new("hydroponics", [ 1]),
   Breed.new("observation", [ 1]),
@@ -90,6 +90,7 @@ class Room {
   tiles { _tiles }
   features { _features }
   breed { _breed }
+  breed=(v) { _breed = v }
 
   light { _light }
   light=(v) { _light = v }
@@ -178,6 +179,12 @@ class StaticRoomGenerator {
 
       room.setTileProperty("light", 2)
     }
+    // Ensure there's a win condition
+    if (rooms.all {|room| room.breed.name != "reactor" }) {
+      rooms[-1].breed = Breed.new("reactor", [ 1])
+    }
+
+
     for (corridor in generator.corridors) {
       var width = 3
       var perp = corridor[1].perp
@@ -228,8 +235,10 @@ class StaticRoomGenerator {
 
       if (room.breed.name == "reactor") {
         System.print("reactor!")
-        map.set(room.pos.x + 2, room.pos.y + 2, Tiles.console)
-        room.tiles.add(map.get(room.pos.x + 2, room.pos.y + 2))
+        var x = M.floor(room.size.x / 2) + room.pos.x
+        room.addTile(x - 1, room.pos.y + 2, Tiles.consoleLeft)
+        room.addTile(x, room.pos.y + 2, Tiles.console)
+        room.addTile(x + 1, room.pos.y + 2, Tiles.consoleRight)
       }
     }
 
@@ -245,8 +254,6 @@ class StaticRoomGenerator {
         var blob = Blob.new(1 + room.pos.x + R.int(room.size.x - 2), 1 + room.pos.y + R.int(room.size.y - 2))
         entities.add(blob)
       }
-
-
     }
 
     var level = Level.new(map, entities, rooms)
