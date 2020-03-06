@@ -197,7 +197,7 @@ class CameraAnimation is Animation {
     camera.x = (camera.x - M.sign(camera.x - player.x) * (1/ TILE_WIDTH))
     camera.y = (camera.y - M.sign(camera.y - player.y) * (1/ TILE_HEIGHT))
 
-    if ((camera.x - player.x).abs < 0.1 && (camera.y - player.y).abs < 0.1) {
+    if ((camera.x - player.x).abs < 0.2 && (camera.y - player.y).abs < 0.2) {
       done = true
       camera.x = M.round(camera.x)
       camera.y = M.round(camera.y)
@@ -230,12 +230,10 @@ class GameView {
   }
 
   update() {
-    _ready = _animations.count == 0
-
     Inputs.each { |input| input.update() }
+    _ready = _animations.count == 0
+    // _ready = _ready && !result.progress && result.events.count == 0
     if (_ready) {
-      if (_gameOver) {
-      }
       for (input in Inputs) {
         if (input.firing) {
           _model.player.action = input.action
@@ -243,7 +241,6 @@ class GameView {
         }
       }
       var result = _model.process()
-      _ready = _ready && !result.progress && result.events.count == 0
       _animations = processEvents(result.events)
     } else {
       var result = _animations[0].update(this)
