@@ -125,7 +125,7 @@ class MoveAction is Action {
     var isSolid = tile["solid"]
     var isOccupied = game.getEntitiesOnTile(dest.x, dest.y).where {|entity| entity.solid }.count > 0
     if (isOccupied) {
-      result.alternate = AttackAction.new(direction, 1)
+      result.alternate = AttackAction.new(direction, 1, !(actor is ChargeBall))
       return true
     }
 
@@ -192,7 +192,7 @@ class ChargeMoveAction is MoveAction {
     var validMove = super.verify(direction, false)
     var target = actor.pos + direction
     if (!validMove) {
-      var attack = AttackAction.new(direction, 1)
+      var attack = AttackAction.new(direction, 1, false)
       attack.bind(actor)
       var valid = attack.perform(result)
       if (valid) {
@@ -204,7 +204,7 @@ class ChargeMoveAction is MoveAction {
       actor.pos.x = target.x
       actor.pos.y = target.y
       if (actor.state != "charging") {
-        var attack = AttackAction.new(direction, 1)
+        var attack = AttackAction.new(direction, 1, false)
         attack.bind(actor)
         var valid = attack.perform(result)
         if (valid) {
@@ -217,7 +217,8 @@ class ChargeMoveAction is MoveAction {
 }
 
 class AttackAction is Action {
-  construct new(dir, power) {
+  construct new(dir, power, log) {
+    _log = log
     _dir = dir
     _power = power
   }
@@ -226,18 +227,18 @@ class AttackAction is Action {
     var valid = false
     var target = actor.pos + _dir
     var targets = game.getEntitiesOnTile(target.x, target.y).each {|entity|
+      if (_log) {
+        game.addEventToResult(LogEvent.new("%(actor.type) hit %(entity.type)"))
+      }
       if (entity is Player) {
         valid = true
         entity.power = entity.power - power
-        game.addEventToResult(LogEvent.new("%(actor.type) hit %(entity.type)"))
         game.addEventToResult(DamagePlayerEvent.new())
       } else if (entity.state is Map && entity.state["hp"] != null) {
-        game.addEventToResult(LogEvent.new("%(actor.type) hit %(entity.type)"))
         valid = true
         entity.state["hp"] = entity.state["hp"] - power
         if (entity.state["hp"] <= 0) {
           game.destroyEntity(entity)
-          System.print("kill")
         }
       }
     }
@@ -246,6 +247,7 @@ class AttackAction is Action {
       tile["hp"] = tile["hp"] - power
       if (tile["hp"] <= 0) {
         var newTile = Tiles.floor.copy
+        game.addEventToResult(LogEvent.new("%(tile["name"]) was destroyed"))
         var rooms = game.getRoomsAtPos(target)
         rooms.each {|room| room.addTile(target.x, target.y, newTile)}
       }

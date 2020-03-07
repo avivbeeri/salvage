@@ -14,7 +14,7 @@ var AirlockMenu = [
 class Tiles {
   static empty { Tile.new(-1, { "solid": true }) }
   static floor { Tile.new(".", {}) }
-  static wall { Tile.new("#", { "solid": true, "obscure": true }) }
+  static wall { Tile.new("#", { "solid": true, "obscure": true, "name": "wall" }) }
   static door { Tile.new("+", { "solid": false, "obscure": true, "hp": 2 }) }
   static lockedDoor { Tile.new("+", { "solid": true, "locked": true, "obscure": true}) }
   static sludge { Tile.new("~", { "cost": 3 }) }

@@ -81,7 +81,7 @@ class Player is Actor {
       _action = null
       _power = (FULL_POWER * 1.00).floor // FULL_POWER
     state = {
-      "facing": Vec.new(0, -1)
+      "facing": Vec.new(0, 1)
     }
   }
 

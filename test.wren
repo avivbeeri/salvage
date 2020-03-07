@@ -5,7 +5,10 @@ import "math" for Vec, M
 
 import "./adt" for Queue
 
-var R = Random.new()
+var SystemRandom = Random.new()
+var Seed = SystemRandom.int(32767)
+System.print(Seed)
+var R = Random.new(Seed)
 var ROOM_HEIGHT = 12
 var ROOM_WIDTH = 12
 

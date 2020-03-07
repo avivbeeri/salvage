@@ -172,7 +172,6 @@ class GameWinAnimation is MessageAnimation {
   update(view) {
     super.update(view)
     if (done) {
-
       var level = StaticRoomGenerator.generate([])
       view.model = GameModel.level(level)
       return view
