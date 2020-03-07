@@ -50,7 +50,10 @@ class GameModel {
     _turn = (_turn + 1) % _entities.count
   }
 
-  currentActor { _entities[_turn] }
+  currentActor {
+    _turn = (_turn) % _entities.count
+    return _entities[_turn]
+  }
 
   process() {
     var actor = currentActor
