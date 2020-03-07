@@ -10,6 +10,13 @@ class MoveEvent is Event {
 
 }
 
+class DamagePlayerEvent {
+  construct new() {}
+}
+
+class WinEvent is Event {
+  construct new() {}
+}
 class GameOverEvent is Event {
   construct new() {}
 }
@@ -29,15 +36,6 @@ class LogEvent is Event {
   }
   text { _text }
   priority { _priority }
-}
-
-class BoltEvent is Event {
-  source { _source }
-  target { _target }
-  construct new(source, tx, ty) {
-    _source = source
-    _target = [tx, ty]
-  }
 }
 
 class MenuEvent is Event {

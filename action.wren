@@ -1,11 +1,15 @@
 import "math" for M, Vec
 import "./dir" for Dir
+import "./line" for GridVisitor
+
 import "./events" for
   MoveEvent,
   LogEvent,
+  WinEvent,
   GameOverEvent,
   SelfDestructEvent,
-  MenuEvent
+  MenuEvent,
+  DamagePlayerEvent
 
 class Action {
   type { _type }
@@ -41,7 +45,7 @@ class RestAction is Action {
     super("rest")
   }
   perform(result) {
-    System.print("%(actor.type) rests.")
+    // System.print("%(actor.type) rests.")
     import "./actor" for Player
     if (actor is Player) {
       if (actor.state["charge"]) {
@@ -221,18 +225,20 @@ class AttackAction is Action {
     _power = power
   }
   perform(result) {
+    var power = actor.attack
     var valid = false
     var target = actor.pos + _dir
     var targets = game.getEntitiesOnTile(target.x, target.y).each {|entity|
       import "./actor" for Player
       if (entity is Player) {
         valid = true
-        entity.power = entity.power - _power
+        entity.power = entity.power - power
         game.addEventToResult(LogEvent.new("%(actor.type) hit %(entity.type)"))
+        game.addEventToResult(DamagePlayerEvent.new())
       } else if (entity.state is Map && entity.state["hp"] != null) {
         game.addEventToResult(LogEvent.new("%(actor.type) hit %(entity.type)"))
         valid = true
-        entity.state["hp"] = entity.state["hp"] - _power
+        entity.state["hp"] = entity.state["hp"] - power
         if (entity.state["hp"] <= 0) {
           game.destroyEntity(entity)
           System.print("kill")
@@ -241,7 +247,7 @@ class AttackAction is Action {
     }
     var tile = game.getTileAt(target)
     if (tile["obscure"] && tile["hp"] != null) {
-      tile["hp"] = tile["hp"] - _power
+      tile["hp"] = tile["hp"] - power
       if (tile["hp"] <= 0) {
         import "./tiles" for Tiles
         var newTile = Tiles.floor.copy
@@ -294,8 +300,40 @@ class SelfDestructAction is Action {
     super("self-destruct")
   }
   perform(result) {
-    game["self-destruct"] = 100
+    var pathMap = GridVisitor.findPath(game.map, game.start)
+    var turns = (GridVisitor.computePath(pathMap, game.player.pos).count * 1.25).floor
+
+    // compute length from player
+
+
+    game["self-destruct"] = turns
     game.addEventToResult(LogEvent.new("Self-destruct set", "high"))
     game.addEventToResult(SelfDestructEvent.new())
+  }
+}
+class ExitShipAction is Action {
+  construct new() {
+    super("exit-ship")
+  }
+  perform(result) {
+    //
+    var win = false
+    if (game["self-destruct"] != null && game["self-destruct"] > 0) {
+      win = true
+    }
+    import "./actor" for Player, ChargeBall
+    var enemies = game.entities.where {|entity|
+      return !(entity is Player) && !(entity is ChargeBall)
+    }
+    if (enemies.count == 0) {
+      win = true
+    }
+    if (win) {
+      game.addEventToResult(LogEvent.new("You win!", "success"))
+      game.addEventToResult(WinEvent.new())
+    } else {
+      game.addEventToResult(LogEvent.new("You retreat, coward.", "high"))
+      game.addEventToResult(GameOverEvent.new())
+    }
   }
 }

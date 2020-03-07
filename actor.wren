@@ -1,6 +1,6 @@
 import "./dir" for Dir
 import "./events" for LogEvent, GameOverEvent
-import "./action" for Action, MoveAction, DanceAction, ChargeMoveAction
+import "./action" for Action, MoveAction, DanceAction, ChargeMoveAction, RestAction
 import "math" for M, Vec
 import "./test" for R
 
@@ -25,12 +25,13 @@ var THRESHOLD = 12
 class Actor {
   construct new(type, x, y) {
     _pos = Vec.new(x, y)
-      _type = type
-      _state = {}
-      _energy = 0
-      _speed = NORMAL_SPEED
-      _visible = false
-      _solid = true
+    _type = type
+    _state = {}
+    _energy = 0
+    _speed = NORMAL_SPEED
+    _visible = false
+    _solid = true
+    _attack = 1
   }
 
   onDestroy() {}
@@ -48,6 +49,8 @@ class Actor {
   canTakeTurn { _energy >= THRESHOLD }
   // END energy mechanics
 
+  attack { _attack }
+  attack=(v) { _attack = v }
   visible { _visible }
   visible=(v) { _visible = v }
   solid { _solid }
@@ -116,6 +119,7 @@ class Blob is Actor {
   construct new(x, y) {
     super("blob", x, y)
     speed = SLOWEST_SPEED
+    attack = 50
     visible = true
     state["hp"] = 1
   }
@@ -137,7 +141,7 @@ class Blob is Actor {
     if (action.verify(dir, true)) {
       return MoveAction.new(dir)
     }
-    return DanceAction.new()
+    return RestAction.new()
   }
 }
 

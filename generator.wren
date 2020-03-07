@@ -258,6 +258,7 @@ class StaticRoomGenerator {
 
     var level = Level.new(map, entities, rooms)
     level.addPlayer(Player.new(rooms[0].pos.x + 1, rooms[0].pos.y + 1))
+    rooms[0].addTile(rooms[0].pos.x + 1, rooms[0].pos.y + 1, Tiles.airlock)
     System.print("player: %(Vec.new(rooms[0].pos.x + 1, rooms[0].pos.y + 1))")
 
 

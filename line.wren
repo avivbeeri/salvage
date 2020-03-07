@@ -10,6 +10,16 @@ var DIRS = [
 ]
 
 class GridVisitor {
+  static computePath(pathMap, goal) {
+    var current = goal
+    var path = []
+    while (current != null) {
+      path.add(current)
+      current = pathMap[Elegant.pair(current)]
+    }
+    return path
+  }
+
   static bfs(map, start, test) {
     var frontier = Queue.init()
     var visited = {}
@@ -25,9 +35,11 @@ class GridVisitor {
         var next = current + dir
         if (next.x < 0 || next.x >= map.width || next.y < 0 || next.y >= map.height) {
         } else {
-          if (!visited[Elegant.pair(next)]) {
-            frontier.enqueue(next)
-            visited[Elegant.pair(next)] = true
+          if (!map.get(next)["solid"]) {
+            if (!visited[Elegant.pair(next)]) {
+              frontier.enqueue(next)
+              visited[Elegant.pair(next)] = true
+            }
           }
         }
       }

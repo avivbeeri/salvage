@@ -1,9 +1,14 @@
 import "./map" for Tile
-import "./action" for SelfDestructAction, Action
+import "./action" for SelfDestructAction, Action, ExitShipAction
 
 var SelfDestructMenu = [
   [ "initiate", SelfDestructAction.new() ],
   [ "restore", Action.none() ]
+]
+
+var AirlockMenu = [
+  [ "leave", ExitShipAction.new() ],
+  [ "cancel", Action.none() ]
 ]
 
 class Tiles {
@@ -19,5 +24,6 @@ class Tiles {
   static console { Tile.new("^", { "solid": true, "menu": SelfDestructMenu }) }
   static consoleLeft { Tile.new("/", { "solid": true }) }
   static consoleRight { Tile.new("\\", { "solid": true }) }
+  static airlock { Tile.new("x", { "solid": true, "menu": AirlockMenu  }) }
 }
 

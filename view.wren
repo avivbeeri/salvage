@@ -15,10 +15,12 @@ import "./tiles" for Tiles
 import "./actor" for FULL_POWER
 import "./events" for
   GameOverEvent,
+  WinEvent,
   MoveEvent,
   LogEvent,
   SelfDestructEvent,
-  MenuEvent
+  MenuEvent,
+  DamagePlayerEvent
 
 import "./line" for GridVisitor
 
@@ -49,6 +51,21 @@ class Animation {
   draw() {}
 }
 
+class QuickFlashAnimation is Animation {
+  construct begin() {
+    _length = 60 * 0.25
+    _color = Color.rgb(255, 0, 0, 128)
+  }
+
+  update(view) {
+    super.update(view)
+    done = t >= _length
+  }
+
+  draw() {
+    Canvas.rectfill(0, 0, (1 + 2 * BORDER) * TILE_WIDTH, (1 + 2 * BORDER) * TILE_HEIGHT, _color)
+  }
+}
 class FlashAnimation is Animation {
   construct begin() {
     _cycle = 30
@@ -228,7 +245,6 @@ class GameView {
       Canvas.rectfill(pos.x * TILE_WIDTH, pos.y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, Color.purple)
     })
     */
-    GridVisitor.findPath(_model.map, _model.player.pos)
   }
 
   camera { _camera }
@@ -273,12 +289,17 @@ class GameView {
       if (event is GameOverEvent) {
         _gameOver = true
         return  [ GameLoseAnimation.begin() ]
+      } else if (event is WinEvent) {
+        _gameOver = true
+        return  [ GameWinAnimation.begin() ]
       } else if (event is LogEvent) {
         System.print(event.text)
         _log.add([ event.priority, event.text ])
         _log = _log.skip(M.max(0, _log.count - 3)).toList
       } else if (event is MenuEvent) {
         return [ WaitAnimation.begin(8), MenuEffect.begin(event.menu) ]
+      } else if (event is DamagePlayerEvent) {
+        return  [ QuickFlashAnimation.begin() ]
       } else if (event is SelfDestructEvent) {
         return [ FlashAnimation.begin() ]
       } else if (event is MoveEvent) {
@@ -339,6 +360,10 @@ class GameView {
             } else {
               Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT + 3, Color.darkblue)
             }
+          } else if (tile.type == Tiles.airlock.type) {
+            Canvas.rectfill(offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, 7, 8, Color.red)
+            Canvas.print(tile.type, offX + x * TILE_WIDTH, offY + y * TILE_HEIGHT, Color.black)
+
           } else if (tile.type == Tiles.door.type) {
             // What kind of door is it?
             var color = Color.darkgreen
@@ -404,9 +429,16 @@ class GameView {
       var lineY = baseline + (logIndex - 2) * 8
       var line = _log[logIndex][1]
       var priority = _log[logIndex][0]
-      var color = priority == "high" ? MAROON : Color.darkgray
-      if (logIndex == _log.count - 1) {
-        color = priority == "high" ? Color.red : Color.white
+      var color = Color.white
+      if (priority == "high") {
+        color = Color.red
+      }
+      if (priority == "success") {
+        color = Color.green
+      }
+      if (logIndex != _log.count - 1) {
+        // color = priority == "high" ? Color.red : Color.white
+        color = Color.rgb(color.r, color.g, color.b, color.a * 0.5)
       }
       Canvas.print(line, left, lineY, color)
     }

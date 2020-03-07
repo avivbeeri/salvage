@@ -25,11 +25,11 @@ class GameResult {
 class GameModel {
   map { _map }
   player { _player }
+  start { _start }
   entities { _entities }
   turn { _turn }
   isPlayerTurn() { _entities[_turn] == _player }
   state { _data }
-  pathMap { _mapMap }
   [index] { _data[index] }
   [index]=(v) { _data[index] = v }
 
@@ -39,9 +39,9 @@ class GameModel {
     _entities.each{|entity| entity.bindGame(this) }
     _rooms = level.data
     _player = _entities.where {|entity| entity.type == "player" }.toList[0]
+    _start = _player.pos * 1
     _turn = 0
     _data = {}
-    _pathMap = null
     recalculate()
 
 
@@ -111,7 +111,6 @@ class GameModel {
   }
 
   recalculate() {
-    // _pathMap = GridVisitor.findPath(_map, _player.pos)
     var facing = _player.state["facing"]
     var min = _player.pos
     var length = 7
