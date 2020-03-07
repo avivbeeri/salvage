@@ -1,9 +1,8 @@
-import "./dir" for Dir
+import "math" for Vec
 import "./action" for MoveAction
 import "./events" for LogEvent, GameOverEvent
 import "./actor" for Player
 import "./line" for LineVisitor, GridVisitor
-import "math" for Vec
 import "./tiles" for Tiles
 
 

@@ -10,7 +10,7 @@ class MoveEvent is Event {
 
 }
 
-class DamagePlayerEvent {
+class DamagePlayerEvent is Event {
   construct new() {}
 }
 

@@ -6,7 +6,7 @@ var DIRS = [
   Vec.new(0, 1),
   Vec.new(-1, 0),
   Vec.new(1, 0),
-  Vec.new(0, -1),
+  Vec.new(0, -1)
 ]
 
 class GridVisitor {

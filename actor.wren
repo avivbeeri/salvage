@@ -1,7 +1,6 @@
-import "./dir" for Dir
+import "math" for M, Vec
 import "./events" for LogEvent, GameOverEvent
 import "./action" for Action, MoveAction, DanceAction, ChargeMoveAction, RestAction
-import "math" for M, Vec
 import "./test" for R
 
 var FULL_POWER = 1560

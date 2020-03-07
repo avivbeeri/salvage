@@ -1,5 +1,4 @@
 import "math" for M, Vec
-import "./dir" for Dir
 import "./line" for GridVisitor
 
 import "./events" for
@@ -46,7 +45,6 @@ class RestAction is Action {
   }
   perform(result) {
     // System.print("%(actor.type) rests.")
-    import "./actor" for Player
     if (actor is Player) {
       if (actor.state["charge"]) {
         result.alternate = FireWeaponAction.new()
@@ -74,7 +72,6 @@ class ChargeWeaponAction is Action {
   perform(result) {
     // We assume this action is taken by a player
     if (!actor.state["charge"]) {
-      import "./actor" for ChargeBall
       var facing = actor.state["facing"]
       var pos = actor.pos + actor.state["facing"]
       var isOccupied = game.getEntitiesOnTile(pos.x, pos.y).where {|entity| entity.solid }.count > 0
@@ -229,7 +226,6 @@ class AttackAction is Action {
     var valid = false
     var target = actor.pos + _dir
     var targets = game.getEntitiesOnTile(target.x, target.y).each {|entity|
-      import "./actor" for Player
       if (entity is Player) {
         valid = true
         entity.power = entity.power - power
@@ -249,7 +245,6 @@ class AttackAction is Action {
     if (tile["obscure"] && tile["hp"] != null) {
       tile["hp"] = tile["hp"] - power
       if (tile["hp"] <= 0) {
-        import "./tiles" for Tiles
         var newTile = Tiles.floor.copy
         var rooms = game.getRoomsAtPos(target)
         rooms.each {|room| room.addTile(target.x, target.y, newTile)}
@@ -337,3 +332,6 @@ class ExitShipAction is Action {
     }
   }
 }
+
+import "./actor" for Player, ChargeBall
+import "./tiles" for Tiles

@@ -1,4 +1,5 @@
 import "math" for Vec, M
+
 class Elegant {
   static pair(vec) { pair(vec.x, vec.y) }
   static pair(x, y) {
